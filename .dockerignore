@@ -1,0 +1,17 @@
+# Ignore .git folder
+.git*
+.gitignore
+
+.circleci*
+docs*
+vendor*
+tests*
+
+CHANGELOG.md
+LICENSE
+Makefile
+README.md
+README.md.bu
+build
+docker-entrypoint.sh
+logo.png
