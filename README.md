@@ -100,7 +100,7 @@ Watch the fun begin :sunglasses: in another terminal
 $ watch -n1 docker ps -a
 ```
 
-You can also watch the data stream into [elasticsearch](https://github.com/maliceio/elasticsearch) by checking out the kibana UI
+You can also watch the data stream into [elasticsearch](https://github.com/maliceio/elasticsearch) by checking out the [kibana](https://github.com/maliceio/kibana) UI
 
 ```bash
 $ malice elk
