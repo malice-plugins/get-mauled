@@ -39,9 +39,9 @@ test_all: test
 .PHONY: test
 test:
 	@echo "===> ${NAME} --help"
-	# @docker run --rm $(ORG)/$(NAME):$(VERSION)
+	@docker run --rm $(ORG)/$(NAME):$(VERSION)
 	@echo "===> ${NAME} test"
-	docker run --rm -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V test
+	docker run --rm -it -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V download
 
 .PHONY: stop
 stop:

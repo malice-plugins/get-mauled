@@ -47,7 +47,7 @@ jobs:
           name: Run tests
           command: |
             set -x
-            docker run --rm app -V test
+            docker run --rm app -V download
       # - run:
       #     name: Review results
       #     command: |
