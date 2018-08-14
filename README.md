@@ -1,3 +1,5 @@
+![get-mauled logo](https://github.com/malice-plugins/get-mauled/blob/master/docs/maul-logo.png)
+
 # get-mauled
 
 [![Circle CI](https://circleci.com/gh/malice-plugins/get-mauled.png?style=shield)](https://circleci.com/gh/malice-plugins/get-mauled) [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org) [![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-18.1MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
