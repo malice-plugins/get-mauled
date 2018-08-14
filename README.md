@@ -43,7 +43,7 @@ Commands:
 Run 'get-mauled COMMAND --help' for more information on a command.
 ```
 
-Download Ze Malwarez :smiling_imp:
+### Download Ze Malwarez :smiling_imp:
 
 ```bash
 $ docker run --rm -it -v /path/to/malware:/malware malice/get-mauled download
@@ -52,7 +52,7 @@ INFO[0000] Downloading file: https://github.com/ytisf/theZoo/raw/master/malwares
 ```
 
 ```bash
-ls /path/to/malware
+ls -lah /path/to/malware
 ```
 
 ```bash
@@ -80,7 +80,31 @@ ls /path/to/malware
 -rw-r--r--   1 blacktop  staff    25K Aug 13 22:49 e83c6c36dbd143ee0fd36aff30fb43529a34129817dc2530f251121527cbf4b4
 ```
 
-## Documentation
+### Use with [MaliceIO](https://github.com/maliceio/malice)
+
+Tell MaliceIO to watch the current directory
+
+```bash
+$ malice watch .
+```
+
+Use `get-mauled` to download to the current directory
+
+```bash
+$ docker run --rm -it -v `pwd`:/malware malice/get-mauled download
+```
+
+Watch the fun begin :sunglasses: in another terminal
+
+```bash
+$ watch -n1 docker ps -a
+```
+
+You can also watch the data stream into [elasticsearch](https://github.com/maliceio/elasticsearch) by checking out the kibana UI
+
+```bash
+$ malice elk
+```
 
 ## Issues
 
@@ -103,6 +127,8 @@ Please update the [CHANGELOG.md](https://github.com/malice-plugins/get-mauled/bl
 - https://contagiodump.blogspot.com/
 
 ## TODO
+
+- [ ] parse all zips at the URLs above
 
 ## License
 
