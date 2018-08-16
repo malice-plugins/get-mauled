@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -10,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -101,6 +103,12 @@ func downloadFromURL(url string, tmpfile *os.File) error {
 	return nil
 }
 
+func getPassword(fileName string) string {
+	base := strings.TrimSuffix(fileName, path.Ext(fileName))
+	decoded, _ := base64.StdEncoding.DecodeString("aW5mZWN0ZWQ2NjY=")
+	return string(decoded) + base[len(base)-1:]
+}
+
 func unzipWithPassword(ctx context.Context, path, password, outputFolder string) (string, error) {
 	var c *exec.Cmd
 
@@ -185,7 +193,7 @@ func main() {
 			Name:      "download",
 			Aliases:   []string{"d"},
 			Usage:     "Download Malware",
-			ArgsUsage: "SHA1 to query NSRL with",
+			ArgsUsage: "URL to download",
 			Flags: []cli.Flag{
 				cli.BoolFlag{
 					Name:   "proxy, x",
