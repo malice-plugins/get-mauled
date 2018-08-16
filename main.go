@@ -103,10 +103,10 @@ func downloadFromURL(url string, tmpfile *os.File) error {
 	return nil
 }
 
-func getPassword(fileName string) string {
-	base := strings.TrimSuffix(fileName, path.Ext(fileName))
-	decoded, _ := base64.StdEncoding.DecodeString("aW5mZWN0ZWQ2NjY=")
-	return string(decoded) + base[len(base)-1:]
+func getPassword(fn string) string {
+	b := strings.TrimSuffix(fn, path.Ext(fn))
+	d, _ := base64.StdEncoding.DecodeString("aW5mZWN0ZWQ2NjY=")
+	return string(d) + b[len(b)-1:]
 }
 
 func unzipWithPassword(ctx context.Context, path, password, outputFolder string) (string, error) {
@@ -181,7 +181,7 @@ func main() {
 	app.Email = "https://github.com/blacktop"
 	app.Version = Version + ", BuildTime: " + BuildTime
 	app.Compiled, _ = time.Parse("20060102", BuildTime)
-	app.Usage = "Malice Demo Malware Downloader Plugin"
+	app.Usage = "Malice DEMO Malware Downloader Plugin"
 	app.Flags = []cli.Flag{
 		cli.BoolFlag{
 			Name:  "verbose, V",
@@ -193,7 +193,7 @@ func main() {
 			Name:      "download",
 			Aliases:   []string{"d"},
 			Usage:     "Download Malware",
-			ArgsUsage: "URL to download",
+			ArgsUsage: "url-to-download",
 			Flags: []cli.Flag{
 				cli.BoolFlag{
 					Name:   "proxy, x",
