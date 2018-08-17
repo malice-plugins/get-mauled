@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	contagioDumpURL   = "https://www.dropbox.com/sh/i6ed6v32x0fp94z/AAAQvOsOvbWrOs8T3_ZTXqQya"
+	contagioDumpURL   = "https://www.dropbox.com/sh/i6ed6v32x0fp94z/AAAQvOsOvbWrOs8T3_ZTXqQya?dl=1"
 	theZooURL         = "https://github.com/ytisf/theZoo.git"
 	malwareSamplesURL = "https://github.com/fabrimagic72/malware-samples.git"
 )

@@ -27,7 +27,7 @@ tags:
 
 .PHONY: ssh
 ssh:
-	@docker run --init -it --rm --entrypoint=bash $(ORG)/$(NAME):$(VERSION)
+	@docker run --init -it --rm --entrypoint=sh $(ORG)/$(NAME):$(VERSION)
 
 .PHONY: tar
 tar:
@@ -42,6 +42,7 @@ test:
 	@docker run --rm $(ORG)/$(NAME):$(VERSION)
 	@echo "===> ${NAME} test"
 	docker run --rm -it -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V download --password infected https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
+	rm -f tests/* || true
 
 .PHONY: stop
 stop:
