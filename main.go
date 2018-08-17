@@ -225,6 +225,8 @@ func main() {
 				defer cancel()
 
 				urls := []string{
+					"https://github.com/ytisf/theZoo.git",
+					"https://github.com/fabrimagic72/malware-samples.git",
 					"https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip",
 					"https://github.com/fabrimagic72/malware-samples/raw/master/Ransomware/Wannacry/smb-0e89k3id.zip",
 					"https://github.com/fabrimagic72/malware-samples/raw/master/Ransomware/NotPetya/027cc450ef5f8c5f653329641ec1fed91f694e0d229928963b30f6b0d7d3a745-20170707033827.zip",

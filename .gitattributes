@@ -1,0 +1,1 @@
+malware/CONTAGIO_MALWARE.zip filter=lfs diff=lfs merge=lfs -text
