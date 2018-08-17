@@ -425,31 +425,35 @@ func main() {
 					}
 				}
 
-				tmpDir, err := ioutil.TempDir("", "clone")
+				cloneDir, err := ioutil.TempDir("", "clone")
 				if err != nil {
-					return errors.Wrap(err, "failed to create tmp directory")
+					return errors.Wrap(err, "failed to create cloneDir tmp directory")
+				}
+				defer os.RemoveAll(cloneDir) // clean up
+				tmpDir, err := ioutil.TempDir("", "temp")
+				if err != nil {
+					return errors.Wrap(err, "failed to create temp tmp directory")
 				}
 				defer os.RemoveAll(tmpDir) // clean up
-
 				// Clones the repository into the given tmpDir, just as a normal git clone does
-				_, err = git.PlainClone(tmpDir, false, &git.CloneOptions{
+				_, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
 					URL: malwareSamplesURL,
 				})
 				if err != nil {
 					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
 				}
 
-				zipFiles, _ := filepath.Glob(tmpDir + "/*/*.zip")
-				sevenZipFiles, _ := filepath.Glob(tmpDir + "/*/*.7z")
+				zipFiles, _ := filepath.Glob(cloneDir + "/*/*.zip")
+				sevenZipFiles, _ := filepath.Glob(cloneDir + "/*/*.7z")
 				zipFiles = append(zipFiles, sevenZipFiles...)
 
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
 					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
-					// if err != nil {
-					// 	return errors.Wrapf(err, "unzipping %s failed", zipFile)
-					// }
-					os.Remove(zipFile)
+					if err != nil {
+						return errors.Wrapf(err, "unzipping %s failed", zipFile)
+					}
+					// os.Remove(zipFile)
 					log.Debug(out)
 				}
 
