@@ -436,7 +436,7 @@ func main() {
 					URL: malwareSamplesURL,
 				})
 				if err != nil {
-					return errors.Wrapf(err, "failed to clone from URL %s", url)
+					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
 				}
 
 				zipFiles, _ := filepath.Glob(tmpDir + "/*/*.zip")
@@ -447,7 +447,7 @@ func main() {
 					fmt.Println(zipFile)
 					out, err := unzip(ctx, zipFile, "infected", tmpDir)
 					if err != nil {
-						return errors.Wrapf(err, "unzipping %s failed", url)
+						return errors.Wrapf(err, "unzipping %s failed", malwareSamplesURL)
 					}
 					log.Debug(out)
 				}
