@@ -369,7 +369,8 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				// increase timeout because it's downloading ~3GBs
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*30*time.Second)
 				defer cancel()
 
 				if len(c.String("output")) > 0 {
