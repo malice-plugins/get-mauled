@@ -44,10 +44,15 @@ jobs:
           paths:
             - /caches/app.tar
       - run:
-          name: Run tests
+          name: Run malware-samples tests
           command: |
             set -x
             docker run --rm -it app -V m
+      - run:
+          name: Run theZoo tests
+          command: |
+            set -x
+            docker run --rm -it app -V z
       # - run:
       #     name: Review results
       #     command: |

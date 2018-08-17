@@ -453,7 +453,77 @@ func main() {
 					if err != nil {
 						return errors.Wrapf(err, "unzipping %s failed", zipFile)
 					}
-					// os.Remove(zipFile)
+					log.Debug(out)
+				}
+
+				err = FlattenDir(tmpDir, output)
+
+				return nil
+			},
+		},
+		{
+			Name:    "the-zoo",
+			Aliases: []string{"z"},
+			Usage:   "Download and Unzip The Zoo Malware",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "output, o",
+					Usage:  "set output directory",
+					EnvVar: "MALICE_OUTPUT_DIRECTORY",
+				},
+			},
+			Action: func(c *cli.Context) error {
+
+				var err error
+				var output string
+
+				if c.GlobalBool("verbose") {
+					log.SetLevel(log.DebugLevel)
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				defer cancel()
+
+				if len(c.String("output")) > 0 {
+					output = c.String("output")
+					if _, err = os.Stat(output); os.IsNotExist(err) {
+						return errors.Wrapf(err, "directory %s doesn't exist", output)
+					}
+				} else {
+					output, err = os.Getwd()
+					if err != nil {
+						return errors.Wrap(err, "unable to get current working directory")
+					}
+				}
+
+				cloneDir, err := ioutil.TempDir("", "clone")
+				if err != nil {
+					return errors.Wrap(err, "failed to create cloneDir tmp directory")
+				}
+				defer os.RemoveAll(cloneDir) // clean up
+				tmpDir, err := ioutil.TempDir("", "temp")
+				if err != nil {
+					return errors.Wrap(err, "failed to create temp tmp directory")
+				}
+				defer os.RemoveAll(tmpDir) // clean up
+				// Clones the repository into the given tmpDir, just as a normal git clone does
+				_, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
+					URL: theZooURL,
+				})
+				if err != nil {
+					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
+				}
+
+				zipFiles, _ := filepath.Glob(cloneDir + "/malwares/Binaries/*/*.zip")
+				sevenZipFiles, _ := filepath.Glob(cloneDir + "/malwares/Binaries/*/*.7z")
+				zipFiles = append(zipFiles, sevenZipFiles...)
+
+				for _, zipFile := range zipFiles {
+					fmt.Println(zipFile)
+					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
+					if err != nil {
+						return errors.Wrapf(err, "unzipping %s failed", zipFile)
+					}
 					log.Debug(out)
 				}
 
