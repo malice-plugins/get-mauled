@@ -58,18 +58,3 @@ jobs:
       #     command: |
       #       set -x
       #       docker run --rm -it app -V c
-      # - run:
-      #     name: Review results
-      #     command: |
-      #       docker cp bro:/pcap/notice.log  pcap/notice.log
-      #       ls -lah pcap
-      #       cat pcap/notice.log | awk '{ print $11 }' | tail -n4
-      # - deploy:
-      #     name: Push application Docker image
-      #     command: |
-      #       if [ "${CIRCLE_BRANCH}" == "master" ]; then
-      #         login="$(aws ecr get-login)"
-      #         ${login}
-      #         docker tag app "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-      #         docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-      #       fi
