@@ -125,9 +125,9 @@ func unzip(ctx context.Context, path, password, outputFolder string) (string, er
 	var args []string
 
 	if len(password) > 0 {
-		args = []string{"x", path, fmt.Sprintf("-p%s", password), fmt.Sprintf("-o%s", outputFolder)}
+		args = []string{"x", path, fmt.Sprintf("-p%s", password), fmt.Sprintf("-o%s", outputFolder), "-y"}
 	} else {
-		args = []string{"x", path, fmt.Sprintf("-o%s", outputFolder)}
+		args = []string{"x", path, fmt.Sprintf("-o%s", outputFolder), "-y"}
 	}
 
 	if ctx != nil {
@@ -449,6 +449,7 @@ func main() {
 					// if err != nil {
 					// 	return errors.Wrapf(err, "unzipping %s failed", zipFile)
 					// }
+					os.Remove(zipFile)
 					log.Debug(out)
 				}
 
