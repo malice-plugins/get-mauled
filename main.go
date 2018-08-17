@@ -11,13 +11,22 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/malice-plugins/go-plugin-utils/utils"
 	"github.com/pkg/errors"
+	git "gopkg.in/src-d/go-git.v4"
+
 	"github.com/urfave/cli"
+)
+
+const (
+	contagioDumpURL   = "https://www.dropbox.com/sh/i6ed6v32x0fp94z/AAAQvOsOvbWrOs8T3_ZTXqQya"
+	theZooURL         = "https://github.com/ytisf/theZoo.git"
+	malwareSamplesURL = "https://github.com/fabrimagic72/malware-samples.git"
 )
 
 var (
@@ -73,11 +82,13 @@ func FlattenDir(src string, dst string) error {
 		} else {
 			// err := os.Rename(srcfp, dstfp)
 			_, err := Copy(srcfp, dstfp)
+			log.Debugf("wrote file to output folder: %s", dstfp)
 			if err != nil {
 				return errors.Wrap(err, "failed to copy file")
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -109,10 +120,15 @@ func getPassword(fn string) string {
 	return string(d) + b[len(b)-1:]
 }
 
-func unzipWithPassword(ctx context.Context, path, password, outputFolder string) (string, error) {
+func unzip(ctx context.Context, path, password, outputFolder string) (string, error) {
 	var c *exec.Cmd
+	var args []string
 
-	args := []string{"x", path, fmt.Sprintf("-p%s", password), fmt.Sprintf("-o%s", outputFolder)}
+	if len(password) > 0 {
+		args = []string{"x", path, fmt.Sprintf("-p%s", password), fmt.Sprintf("-o%s", outputFolder)}
+	} else {
+		args = []string{"x", path, fmt.Sprintf("-o%s", outputFolder)}
+	}
 
 	if ctx != nil {
 		c = exec.CommandContext(ctx, "7z", args...)
@@ -160,13 +176,47 @@ func downloadAndUnzip(ctx context.Context, url, password, output string) error {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	out, err := unzipWithPassword(ctx, tmpfile.Name(), password, tmpDir)
+	out, err := unzip(ctx, tmpfile.Name(), password, tmpDir)
 	if err != nil {
 		return errors.Wrapf(err, "unzipping %s failed", url)
 	}
 	log.Debug(out)
 
 	err = FlattenDir(tmpDir, output)
+
+	return nil
+}
+
+func gitCloneAndUnzip(ctx context.Context, url, output string) error {
+
+	tmpDir, err := ioutil.TempDir("", "clone")
+	if err != nil {
+		return errors.Wrap(err, "failed to create tmp directory")
+	}
+	defer os.RemoveAll(tmpDir) // clean up
+
+	// Clones the repository into the given tmpDir, just as a normal git clone does
+	_, err = git.PlainClone(tmpDir, false, &git.CloneOptions{
+		URL: url,
+	})
+	if err != nil {
+		return errors.Wrapf(err, "failed to clone from URL %s", url)
+	}
+
+	zipFiles, _ := filepath.Glob(tmpDir + "/*/*.zip")
+	sevenZipFiles, _ := filepath.Glob(tmpDir + "/*/*.7z")
+	zipFiles = append(zipFiles, sevenZipFiles...)
+
+	for _, zipFile := range zipFiles {
+		fmt.Println(zipFile)
+		// out, err := unzip(ctx, zipFile, "infected", tmpDir)
+		// if err != nil {
+		// 	return errors.Wrapf(err, "unzipping %s failed", url)
+		// }
+		// log.Debug(out)
+	}
+
+	// err = FlattenDir(tmpDir, output)
 
 	return nil
 }
@@ -187,73 +237,223 @@ func main() {
 			Name:  "verbose, V",
 			Usage: "verbose output",
 		},
+		cli.BoolFlag{
+			Name:   "proxy, x",
+			Usage:  "proxy settings for Malice webhook endpoint",
+			EnvVar: "MALICE_PROXY",
+		},
+		cli.IntFlag{
+			Name:   "timeout",
+			Value:  60,
+			Usage:  "malice plugin timeout (in seconds)",
+			EnvVar: "MALICE_TIMEOUT",
+		},
 	}
 	app.Commands = []cli.Command{
 		{
 			Name:      "download",
 			Aliases:   []string{"d"},
-			Usage:     "Download Malware",
+			Usage:     "Download and Unzip Malware From URL",
 			ArgsUsage: "url-to-download",
 			Flags: []cli.Flag{
-				cli.BoolFlag{
-					Name:   "proxy, x",
-					Usage:  "proxy settings for Malice webhook endpoint",
-					EnvVar: "MALICE_PROXY",
-				},
-				cli.IntFlag{
-					Name:   "timeout",
-					Value:  60,
-					Usage:  "malice plugin timeout (in seconds)",
-					EnvVar: "MALICE_TIMEOUT",
-				},
+
 				cli.StringFlag{
 					Name:   "password, p",
-					Value:  "infected",
 					Usage:  "password of malware zip",
 					EnvVar: "MALICE_ZIP_PASSWORD",
 				},
 				cli.StringFlag{
 					Name:   "output, o",
-					Value:  "/malware",
 					Usage:  "set output directory",
 					EnvVar: "MALICE_OUTPUT_DIRECTORY",
 				},
 			},
 			Action: func(c *cli.Context) error {
 
-				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.Int("timeout"))*time.Second)
-				defer cancel()
-
-				urls := []string{
-					"https://github.com/ytisf/theZoo.git",
-					"https://github.com/fabrimagic72/malware-samples.git",
-					"https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip",
-					"https://github.com/fabrimagic72/malware-samples/raw/master/Ransomware/Wannacry/smb-0e89k3id.zip",
-					"https://github.com/fabrimagic72/malware-samples/raw/master/Ransomware/NotPetya/027cc450ef5f8c5f653329641ec1fed91f694e0d229928963b30f6b0d7d3a745-20170707033827.zip",
-				}
-
-				if c.Args().Present() {
-					urls = []string{c.Args().First()}
-				}
+				var err error
+				var output string
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err := os.Stat(c.String("output")); os.IsNotExist(err) {
-					return errors.Wrapf(err, "directory %s doesn't exist", c.String("output"))
-				}
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				defer cancel()
 
-				for _, url := range urls {
-					err := downloadAndUnzip(ctx, url, c.String("password"), c.String("output"))
+				if len(c.String("output")) > 0 {
+					output = c.String("output")
+					if _, err = os.Stat(output); os.IsNotExist(err) {
+						return errors.Wrapf(err, "directory %s doesn't exist", output)
+					}
+				} else {
+					output, err = os.Getwd()
 					if err != nil {
-						log.Fatal(err)
+						return errors.Wrap(err, "unable to get current working directory")
 					}
 				}
 
-				// } else {
-				// 	log.Fatal(fmt.Errorf("please supply a URL to download"))
-				// }
+				if c.Args().Present() {
+					err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"), output)
+					if err != nil {
+						log.Fatal(err)
+					}
+
+				} else {
+					log.Fatal(fmt.Errorf("please supply a URL to download and unzip"))
+				}
+				return nil
+			},
+		},
+		{
+			Name:    "all",
+			Aliases: []string{"a"},
+			Usage:   "Gotta' Catch Em' All",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "output, o",
+					Usage:  "set output directory",
+					EnvVar: "MALICE_OUTPUT_DIRECTORY",
+				},
+			},
+			Action: func(c *cli.Context) error {
+
+				var err error
+				var output string
+
+				if c.GlobalBool("verbose") {
+					log.SetLevel(log.DebugLevel)
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				defer cancel()
+
+				if len(c.String("output")) > 0 {
+					output = c.String("output")
+					if _, err = os.Stat(output); os.IsNotExist(err) {
+						return errors.Wrapf(err, "directory %s doesn't exist", output)
+					}
+				} else {
+					output, err = os.Getwd()
+					if err != nil {
+						return errors.Wrap(err, "unable to get current working directory")
+					}
+				}
+
+				err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"), output)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				return nil
+			},
+		},
+		{
+			Name:    "contagio",
+			Aliases: []string{"c"},
+			Usage:   "Download and Unzip contagiodump Malware",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "output, o",
+					Usage:  "set output directory",
+					EnvVar: "MALICE_OUTPUT_DIRECTORY",
+				},
+			},
+			Action: func(c *cli.Context) error {
+
+				var err error
+				var output string
+
+				if c.GlobalBool("verbose") {
+					log.SetLevel(log.DebugLevel)
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				defer cancel()
+
+				if len(c.String("output")) > 0 {
+					output = c.String("output")
+					if _, err = os.Stat(output); os.IsNotExist(err) {
+						return errors.Wrapf(err, "directory %s doesn't exist", output)
+					}
+				} else {
+					output, err = os.Getwd()
+					if err != nil {
+						return errors.Wrap(err, "unable to get current working directory")
+					}
+				}
+
+				err = gitCloneAndUnzip(ctx, malwareSamplesURL, output)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				return nil
+			},
+		},
+		{
+			Name:    "malware-samples",
+			Aliases: []string{"m"},
+			Usage:   "Download and Unzip Malware Samples",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "output, o",
+					Usage:  "set output directory",
+					EnvVar: "MALICE_OUTPUT_DIRECTORY",
+				},
+			},
+			Action: func(c *cli.Context) error {
+
+				var err error
+				var output string
+
+				if c.GlobalBool("verbose") {
+					log.SetLevel(log.DebugLevel)
+				}
+
+				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				defer cancel()
+
+				if len(c.String("output")) > 0 {
+					output = c.String("output")
+					if _, err = os.Stat(output); os.IsNotExist(err) {
+						return errors.Wrapf(err, "directory %s doesn't exist", output)
+					}
+				} else {
+					output, err = os.Getwd()
+					if err != nil {
+						return errors.Wrap(err, "unable to get current working directory")
+					}
+				}
+
+				tmpDir, err := ioutil.TempDir("", "clone")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(tmpDir) // clean up
+
+				// Clones the repository into the given tmpDir, just as a normal git clone does
+				_, err = git.PlainClone(tmpDir, false, &git.CloneOptions{
+					URL: malwareSamplesURL,
+				})
+				if err != nil {
+					return errors.Wrapf(err, "failed to clone from URL %s", url)
+				}
+
+				zipFiles, _ := filepath.Glob(tmpDir + "/*/*.zip")
+				sevenZipFiles, _ := filepath.Glob(tmpDir + "/*/*.7z")
+				zipFiles = append(zipFiles, sevenZipFiles...)
+
+				for _, zipFile := range zipFiles {
+					fmt.Println(zipFile)
+					out, err := unzip(ctx, zipFile, "infected", tmpDir)
+					if err != nil {
+						return errors.Wrapf(err, "unzipping %s failed", url)
+					}
+					log.Debug(out)
+				}
+
+				err = FlattenDir(tmpDir, output)
+
 				return nil
 			},
 		},

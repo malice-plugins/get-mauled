@@ -42,6 +42,22 @@
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:d917313f309bda80d27274d53985bc65651f81a5b66b820749ac7f8ef061fd04"
+  name = "github.com/sergi/go-diff"
+  packages = ["diffmatchpatch"]
+  pruneopts = "UT"
+  revision = "1744e2970ca51c86172c8190fadad617561ed6e7"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:d888308f8887be8103266d138aecb35bc165e16b743661c060faf61d32453b4d"
+  name = "github.com/src-d/go-git"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "02c228585e543413479ea36d3a2bbc80a070eb93"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
   name = "github.com/urfave/cli"
   packages = ["."]
@@ -51,11 +67,20 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  digest = "1:10e257965f5774c1ef03b258130a6caa8dddbfe03041f69d7c16a00463dece62"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
+    "poly1305",
+    "ssh",
+    "ssh/terminal",
+  ]
   pruneopts = "UT"
-  revision = "de0752318171da717af4ce24d0a2e8626afaeb11"
+  revision = "aabede6cba87e37f413b3e60ebfc214f8eeca1b0"
 
 [[projects]]
   branch = "master"
@@ -66,18 +91,18 @@
     "publicsuffix",
   ]
   pruneopts = "UT"
-  revision = "c39426892332e1bb5ec0a434a079bf82f5d30c54"
+  revision = "aaf60122140d3fcf75376d319f0554393160eb50"
 
 [[projects]]
   branch = "master"
-  digest = "1:a60cae5be8993938498243605b120290533a5208fd5cac81c932afbad3642fb0"
+  digest = "1:2f71657f09ff05e4567909e9e0de7ad799828c96d402c540b41dc044a6590fb2"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "98c5dad5d1a0e8a73845ecc8897d0bd56586511d"
+  revision = "1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -102,6 +127,37 @@
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
+[[projects]]
+  digest = "1:6432785f8a6e930ab914151f8a89a7f3156b0981342e39b2ebc471f0f2b54cdd"
+  name = "gopkg.in/sourcegraph/go-vcsurl.v1"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6b12603ea6fd7f84b8c90118face09df39ea10c6"
+  version = "v1"
+
+[[projects]]
+  digest = "1:93c77383a2c5bbd311ac591edd18da20b0b52ddbc6bd3b0f3e57f5aff953ba27"
+  name = "gopkg.in/src-d/go-git.v3"
+  packages = [
+    "clients",
+    "clients/common",
+    "clients/http",
+    "clients/ssh",
+    "core",
+    "diff",
+    "formats/idxfile",
+    "formats/packfile",
+    "formats/pktline",
+    "storage/memory",
+    "storage/seekable",
+    "storage/seekable/internal/gitdir",
+    "storage/seekable/internal/index",
+    "utils/fs",
+  ]
+  pruneopts = "UT"
+  revision = "02c228585e543413479ea36d3a2bbc80a070eb93"
+  version = "v3.2.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -109,6 +165,7 @@
     "github.com/Sirupsen/logrus",
     "github.com/malice-plugins/go-plugin-utils/utils",
     "github.com/pkg/errors",
+    "github.com/src-d/go-git",
     "github.com/urfave/cli",
   ]
   solver-name = "gps-cdcl"
