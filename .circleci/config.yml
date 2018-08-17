@@ -53,6 +53,11 @@ jobs:
           command: |
             set -x
             docker run --rm -it app -V z
+      - run:
+          name: Run contagio tests
+          command: |
+            set -x
+            docker run --rm -it app -V c
       # - run:
       #     name: Review results
       #     command: |

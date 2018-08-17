@@ -120,6 +120,27 @@ func getPassword(fn string) string {
 	return string(d) + b[len(b)-1:]
 }
 
+func findAllZips(dir string) ([]string, error) {
+	var zips []string
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", dir, err)
+			return errors.Wrapf(err, "failure accessing a path %q", dir)
+		}
+		log.Debugf("visited file: %q\n", path)
+		if !info.IsDir() && (filepath.Ext(path) == ".zip" || filepath.Ext(path) == ".7z") {
+			zips = append(zips, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return []string{}, err
+	}
+
+	return zips, nil
+}
 func unzip(ctx context.Context, path, password, outputFolder string) (string, error) {
 	var c *exec.Cmd
 	var args []string
@@ -183,40 +204,6 @@ func downloadAndUnzip(ctx context.Context, url, password, output string) error {
 	log.Debug(out)
 
 	err = FlattenDir(tmpDir, output)
-
-	return nil
-}
-
-func gitCloneAndUnzip(ctx context.Context, url, output string) error {
-
-	tmpDir, err := ioutil.TempDir("", "clone")
-	if err != nil {
-		return errors.Wrap(err, "failed to create tmp directory")
-	}
-	defer os.RemoveAll(tmpDir) // clean up
-
-	// Clones the repository into the given tmpDir, just as a normal git clone does
-	_, err = git.PlainClone(tmpDir, false, &git.CloneOptions{
-		URL: url,
-	})
-	if err != nil {
-		return errors.Wrapf(err, "failed to clone from URL %s", url)
-	}
-
-	zipFiles, _ := filepath.Glob(tmpDir + "/*/*.zip")
-	sevenZipFiles, _ := filepath.Glob(tmpDir + "/*/*.7z")
-	zipFiles = append(zipFiles, sevenZipFiles...)
-
-	for _, zipFile := range zipFiles {
-		fmt.Println(zipFile)
-		// out, err := unzip(ctx, zipFile, "infected", tmpDir)
-		// if err != nil {
-		// 	return errors.Wrapf(err, "unzipping %s failed", url)
-		// }
-		// log.Debug(out)
-	}
-
-	// err = FlattenDir(tmpDir, output)
 
 	return nil
 }
@@ -382,10 +369,47 @@ func main() {
 					}
 				}
 
-				err = gitCloneAndUnzip(ctx, malwareSamplesURL, output)
+				tmpfile, err := ioutil.TempFile("", "contagio")
 				if err != nil {
-					log.Fatal(err)
+					return errors.Wrap(err, "failed to create tmp file")
 				}
+
+				err = downloadFromURL(contagioDumpURL, tmpfile)
+				if err != nil {
+					return errors.Wrapf(err, "downloading %s failed", contagioDumpURL)
+				}
+
+				if err := tmpfile.Close(); err != nil {
+					return errors.Wrap(err, "failed to close tmp file")
+				}
+
+				tmpDir, err := ioutil.TempDir("", "getmauled")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(tmpDir)
+
+				out, err := unzip(ctx, tmpfile.Name(), "", tmpDir)
+				if err != nil {
+					return errors.Wrapf(err, "unzipping %s failed", tmpfile.Name())
+				}
+				log.Debug(out)
+				os.Remove(tmpfile.Name())
+
+				zipFiles, err := findAllZips(tmpDir)
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", tmpDir)
+				}
+				for _, zipFile := range zipFiles {
+					fmt.Println(zipFile)
+					out, _ := unzip(ctx, zipFile, getPassword(zipFile), tmpDir)
+					if err != nil {
+						return errors.Wrapf(err, "unzipping %s failed", zipFile)
+					}
+					log.Debug(out)
+				}
+
+				err = FlattenDir(tmpDir, output)
 
 				return nil
 			},
@@ -443,9 +467,10 @@ func main() {
 					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
 				}
 
-				zipFiles, _ := filepath.Glob(cloneDir + "/*/*.zip")
-				sevenZipFiles, _ := filepath.Glob(cloneDir + "/*/*.7z")
-				zipFiles = append(zipFiles, sevenZipFiles...)
+				zipFiles, err := findAllZips(cloneDir)
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir)
+				}
 
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
@@ -514,9 +539,10 @@ func main() {
 					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
 				}
 
-				zipFiles, _ := filepath.Glob(cloneDir + "/malwares/Binaries/*/*.zip")
-				sevenZipFiles, _ := filepath.Glob(cloneDir + "/malwares/Binaries/*/*.7z")
-				zipFiles = append(zipFiles, sevenZipFiles...)
+				zipFiles, err := findAllZips(cloneDir + "/malwares/Binaries")
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir+"/malwares/Binaries")
+				}
 
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
