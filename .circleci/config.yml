@@ -43,21 +43,21 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/app.tar
-      # - run:
-      #     name: Run malware-samples tests
-      #     command: |
-      #       set -x
-      #       docker run --rm -it app -V m
-      # - run:
-      #     name: Run theZoo tests
-      #     command: |
-      #       set -x
-      #       docker run --rm -it app -V z
       - run:
-          name: Run contagio tests
+          name: Run malware-samples tests
           command: |
             set -x
-            docker run --rm -it app -V c
+            docker run --rm -it app -V m
+      - run:
+          name: Run theZoo tests
+          command: |
+            set -x
+            docker run --rm -it app -V z
+      # - run:
+      #     name: Run contagio tests
+      #     command: |
+      #       set -x
+      #       docker run --rm -it app -V c
       # - run:
       #     name: Review results
       #     command: |
