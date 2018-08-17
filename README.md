@@ -99,7 +99,7 @@ $ malice watch .
 Use `get-mauled` to download to the current directory
 
 ```bash
-$ docker run --rm -it -v `pwd`:/malware malice/get-mauled download
+$ docker run --rm -it -v `pwd`:/malware malice/get-mauled the-zoo
 ```
 
 Watch the fun begin :sunglasses: in another terminal
