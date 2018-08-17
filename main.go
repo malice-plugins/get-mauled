@@ -238,60 +238,6 @@ func main() {
 	}
 	app.Commands = []cli.Command{
 		{
-			Name:      "download",
-			Aliases:   []string{"d"},
-			Usage:     "Download and Unzip Malware From URL",
-			ArgsUsage: "url-to-download",
-			Flags: []cli.Flag{
-
-				cli.StringFlag{
-					Name:   "password, p",
-					Usage:  "password of malware zip",
-					EnvVar: "MALICE_ZIP_PASSWORD",
-				},
-				cli.StringFlag{
-					Name:   "output, o",
-					Usage:  "set output directory",
-					EnvVar: "MALICE_OUTPUT_DIRECTORY",
-				},
-			},
-			Action: func(c *cli.Context) error {
-
-				var err error
-				var output string
-
-				if c.GlobalBool("verbose") {
-					log.SetLevel(log.DebugLevel)
-				}
-
-				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
-				defer cancel()
-
-				if len(c.String("output")) > 0 {
-					output = c.String("output")
-					if _, err = os.Stat(output); os.IsNotExist(err) {
-						return errors.Wrapf(err, "directory %s doesn't exist", output)
-					}
-				} else {
-					output, err = os.Getwd()
-					if err != nil {
-						return errors.Wrap(err, "unable to get current working directory")
-					}
-				}
-
-				if c.Args().Present() {
-					err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"), output)
-					if err != nil {
-						log.Fatal(err)
-					}
-
-				} else {
-					log.Fatal(fmt.Errorf("please supply a URL to download and unzip"))
-				}
-				return nil
-			},
-		},
-		{
 			Name:    "all",
 			Aliases: []string{"a"},
 			Usage:   "Gotta' Catch Em' All",
@@ -311,6 +257,46 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
+				// ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
+				// defer cancel()
+
+				if len(c.String("output")) > 0 {
+					output = c.String("output")
+					if _, err = os.Stat(output); os.IsNotExist(err) {
+						return errors.Wrapf(err, "directory %s doesn't exist", output)
+					}
+				} else {
+					output, err = os.Getwd()
+					if err != nil {
+						return errors.Wrap(err, "unable to get current working directory")
+					}
+				}
+
+				log.Error("this command hasn't been implimented yet")
+
+				return nil
+			},
+		},
+		{
+			Name:    "the-zoo",
+			Aliases: []string{"z"},
+			Usage:   "Download and Unzip The Zoo Malware",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name:   "output, o",
+					Usage:  "set output directory",
+					EnvVar: "MALICE_OUTPUT_DIRECTORY",
+				},
+			},
+			Action: func(c *cli.Context) error {
+
+				var err error
+				var output string
+
+				if c.GlobalBool("verbose") {
+					log.SetLevel(log.DebugLevel)
+				}
+
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				defer cancel()
 
@@ -326,10 +312,39 @@ func main() {
 					}
 				}
 
-				err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"), output)
+				cloneDir, err := ioutil.TempDir("", "clone")
 				if err != nil {
-					log.Fatal(err)
+					return errors.Wrap(err, "failed to create cloneDir tmp directory")
 				}
+				defer os.RemoveAll(cloneDir) // clean up
+				tmpDir, err := ioutil.TempDir("", "temp")
+				if err != nil {
+					return errors.Wrap(err, "failed to create temp tmp directory")
+				}
+				defer os.RemoveAll(tmpDir) // clean up
+				// Clones the repository into the given tmpDir, just as a normal git clone does
+				_, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
+					URL: theZooURL,
+				})
+				if err != nil {
+					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
+				}
+
+				zipFiles, err := findAllZips(cloneDir + "/malwares/Binaries")
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir+"/malwares/Binaries")
+				}
+
+				for _, zipFile := range zipFiles {
+					fmt.Println(zipFile)
+					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
+					if err != nil {
+						return errors.Wrapf(err, "unzipping %s failed", zipFile)
+					}
+					log.Debug(out)
+				}
+
+				err = FlattenDir(tmpDir, output)
 
 				return nil
 			},
@@ -487,10 +502,17 @@ func main() {
 			},
 		},
 		{
-			Name:    "the-zoo",
-			Aliases: []string{"z"},
-			Usage:   "Download and Unzip The Zoo Malware",
+			Name:      "download",
+			Aliases:   []string{"d"},
+			Usage:     "Download and Unzip Malware From URL",
+			ArgsUsage: "url-to-download",
 			Flags: []cli.Flag{
+
+				cli.StringFlag{
+					Name:   "password, p",
+					Usage:  "password of malware zip",
+					EnvVar: "MALICE_ZIP_PASSWORD",
+				},
 				cli.StringFlag{
 					Name:   "output, o",
 					Usage:  "set output directory",
@@ -521,40 +543,15 @@ func main() {
 					}
 				}
 
-				cloneDir, err := ioutil.TempDir("", "clone")
-				if err != nil {
-					return errors.Wrap(err, "failed to create cloneDir tmp directory")
-				}
-				defer os.RemoveAll(cloneDir) // clean up
-				tmpDir, err := ioutil.TempDir("", "temp")
-				if err != nil {
-					return errors.Wrap(err, "failed to create temp tmp directory")
-				}
-				defer os.RemoveAll(tmpDir) // clean up
-				// Clones the repository into the given tmpDir, just as a normal git clone does
-				_, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
-					URL: theZooURL,
-				})
-				if err != nil {
-					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
-				}
-
-				zipFiles, err := findAllZips(cloneDir + "/malwares/Binaries")
-				if err != nil {
-					return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir+"/malwares/Binaries")
-				}
-
-				for _, zipFile := range zipFiles {
-					fmt.Println(zipFile)
-					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
+				if c.Args().Present() {
+					err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"), output)
 					if err != nil {
-						return errors.Wrapf(err, "unzipping %s failed", zipFile)
+						log.Fatal(err)
 					}
-					log.Debug(out)
+
+				} else {
+					log.Fatal(fmt.Errorf("please supply a URL to download and unzip"))
 				}
-
-				err = FlattenDir(tmpDir, output)
-
 				return nil
 			},
 		},

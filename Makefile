@@ -41,7 +41,7 @@ test:
 	@echo "===> ${NAME} --help"
 	@docker run --rm $(ORG)/$(NAME):$(VERSION)
 	@echo "===> ${NAME} test"
-	docker run --rm -it -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V download
+	docker run --rm -it -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V download --password infected https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 
 .PHONY: stop
 stop:

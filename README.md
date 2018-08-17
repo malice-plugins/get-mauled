@@ -24,7 +24,7 @@ $ docker run --rm -v /path/to/malware:/malware malice/get-mauled --help
 
 Usage: get-mauled [OPTIONS] COMMAND [arg...]
 
-Malice Demo Malware Downloader Plugin
+Malice DEMO Malware Downloader Plugin
 
 Version: v0.1.0, BuildTime: 20180814
 
@@ -32,13 +32,19 @@ Author:
   blacktop - <https://github.com/blacktop>
 
 Options:
-  --verbose, -V  verbose output
-  --help, -h     show help
-  --version, -v  print the version
+  --verbose, -V    verbose output
+  --proxy, -x      proxy settings for Malice webhook endpoint [$MALICE_PROXY]
+  --timeout value  malice plugin timeout (in seconds) (default: 60) [$MALICE_TIMEOUT]
+  --help, -h       show help
+  --version, -v    print the version
 
 Commands:
-  download  Download Malware
-  help      Shows a list of commands or help for one command
+  all              Gotta' Catch Em' All
+  the-zoo          Download and Unzip The Zoo Malware
+  contagio         Download and Unzip contagiodump Malware
+  malware-samples  Download and Unzip Malware Samples
+  download         Download and Unzip Malware From URL
+  help             Shows a list of commands or help for one command
 
 Run 'get-mauled COMMAND --help' for more information on a command.
 ```
@@ -46,7 +52,9 @@ Run 'get-mauled COMMAND --help' for more information on a command.
 ### Download Ze Malwarez :smiling_imp:
 
 ```bash
-$ docker run --rm -it -v /path/to/malware:/malware malice/get-mauled download
+$ docker run --rm -it \
+             -v /path/to/malware:/malware \
+             malice/get-mauled download --password infected https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 
 INFO[0000] Downloading file: https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 ```
@@ -128,7 +136,7 @@ Please update the [CHANGELOG.md](https://github.com/malice-plugins/get-mauled/bl
 
 ## TODO
 
-- [ ] parse all zips at the URLs above
+- [x] parse all zips at the URLs above
 - [ ] create golang binary releases for people who hate docker :whale:
 
 ## License

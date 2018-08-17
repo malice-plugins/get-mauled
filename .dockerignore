@@ -6,6 +6,7 @@
 docs*
 vendor*
 tests*
+malware*
 
 CHANGELOG.md
 LICENSE
