@@ -445,10 +445,10 @@ func main() {
 
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
-					out, err := unzip(ctx, zipFile, "infected", tmpDir)
-					if err != nil {
-						return errors.Wrapf(err, "unzipping %s failed", malwareSamplesURL)
-					}
+					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
+					// if err != nil {
+					// 	return errors.Wrapf(err, "unzipping %s failed", zipFile)
+					// }
 					log.Debug(out)
 				}
 
