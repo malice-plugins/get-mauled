@@ -73,6 +73,7 @@ clean:
 	docker-clean stop
 	docker rmi $(ORG)/$(NAME):$(VERSION)
 	docker rmi $(ORG)/$(NAME):base
+	rm -rf dist
 
 # Absolutely awesome: http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 help:

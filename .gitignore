@@ -14,3 +14,4 @@
 
 *.bu
 tests/*
+dist/*
