@@ -17,7 +17,17 @@
 1.  Install [Docker](https://www.docker.io/).
 2.  Download [trusted build](https://hub.docker.com/r/malice/get-mauled/) from public [DockerHub](https://hub.docker.com): `docker pull malice/get-mauled`
 
+=OR=
+
+Download binary: https://github.com/malice-plugins/get-mauled/releases
+
 ## Usage
+
+```bash
+$ ./get-mauled
+```
+
+=OR=
 
 ```bash
 $ docker run --rm -v /path/to/malware:/malware malice/get-mauled --help
