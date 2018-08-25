@@ -49,6 +49,12 @@ stop:
 	@echo "===> Stopping container ${NAME}"
 	@docker container rm -f $(NAME) || true
 
+.PHONY: release
+release: ## Create a new release from the VERSION
+	@echo "===> Creating Release"
+	@hack/make/release ${VERSION}
+	@goreleaser --rm-dist
+
 .PHONY: circle
 circle: ci-size
 	@sed -i.bu 's/docker%20image-.*-blue/docker%20image-$(shell cat .circleci/size)-blue/' README.md

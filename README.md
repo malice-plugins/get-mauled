@@ -137,7 +137,7 @@ Please update the [CHANGELOG.md](https://github.com/malice-plugins/get-mauled/bl
 ## TODO
 
 - [x] parse all zips at the URLs above
-- [ ] create golang binary releases for people who hate docker :whale:
+- [x] create golang binary releases for people who hate docker :whale:
 
 ## License
 
