@@ -49,6 +49,10 @@ stop:
 	@echo "===> Stopping container ${NAME}"
 	@docker container rm -f $(NAME) || true
 
+.PHONY: dry_release
+dry_release:
+	goreleaser --skip-publish --rm-dist --skip-validate
+
 .PHONY: release
 release: ## Create a new release from the VERSION
 	@echo "===> Creating Release"
