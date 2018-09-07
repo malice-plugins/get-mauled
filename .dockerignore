@@ -7,6 +7,9 @@ docs*
 vendor*
 tests*
 malware*
+dist*
+.vscode*
+hack*
 
 CHANGELOG.md
 LICENSE

@@ -152,9 +152,9 @@ func unzip(ctx context.Context, path, password, outputFolder string) (string, er
 	}
 
 	if ctx != nil {
-		c = exec.CommandContext(ctx, "7z", args...)
+		c = exec.CommandContext(ctx, "/usr/bin/7z", args...)
 	} else {
-		c = exec.Command("7z", args...)
+		c = exec.Command("/usr/bin/7z", args...)
 	}
 
 	log.Debug("running command: ", c.Args)
@@ -257,7 +257,7 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
 					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
@@ -301,7 +301,7 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
 					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
@@ -377,7 +377,7 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
 					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
@@ -462,7 +462,7 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
 					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
@@ -545,7 +545,7 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
 					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
