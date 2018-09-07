@@ -257,6 +257,10 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
+				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				}
+
 				// ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				// defer cancel()
 
@@ -295,6 +299,10 @@ func main() {
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
+				}
+
+				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
@@ -367,6 +375,10 @@ func main() {
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
+				}
+
+				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
 				// increase timeout because it's downloading ~3GBs
@@ -450,6 +462,10 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
+				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				}
+
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				defer cancel()
 
@@ -527,6 +543,10 @@ func main() {
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
+				}
+
+				if _, err = os.Stat("7z"); os.IsNotExist(err) {
+					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
 				}
 
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)

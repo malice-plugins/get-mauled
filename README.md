@@ -13,11 +13,12 @@
 ### Dependencies
 
 - [malice/alpine](https://hub.docker.com/r/malice/alpine/)
+- [7zip](https://www.7-zip.org/download.html)
 
 ## Installation
 
-1.  Install [Docker](https://www.docker.io/).
-2.  Download [trusted build](https://hub.docker.com/r/malice/get-mauled/) from public [DockerHub](https://hub.docker.com): `docker pull malice/get-mauled`
+1. Install [Docker](https://www.docker.io/).
+2. Download [trusted build](https://hub.docker.com/r/malice/get-mauled/) from public [DockerHub](https://hub.docker.com): `docker pull malice/get-mauled`
 
 =OR=
 
