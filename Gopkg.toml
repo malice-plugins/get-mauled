@@ -24,9 +24,9 @@
 #   go-tests = true
 #   unused-packages = true
 
-# [[constraint]]
-#   name = "gopkg.in/src-d/go-git.v4"
-#   revision = "d3cec13ac0b195bfb897ed038a08b5130ab9969e"
+[[constraint]]
+  name = "github.com/dustin/go-humanize"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/minio/minio-go"

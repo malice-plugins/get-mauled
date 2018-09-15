@@ -11,11 +11,9 @@ dist*
 .vscode*
 hack*
 
-CHANGELOG.md
+*.md
+*.md.bu
 LICENSE
 Makefile
-README.md
-README.md.bu
 build
-docker-entrypoint.sh
 logo.png

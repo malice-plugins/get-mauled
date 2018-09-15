@@ -4,7 +4,7 @@
 
 [![Circle CI](https://circleci.com/gh/malice-plugins/get-mauled.png?style=shield)](https://circleci.com/gh/malice-plugins/get-mauled) [![Github All Releases](https://img.shields.io/github/downloads/malice-plugins/get-mauled/total.svg)](https://github.com/malice-plugins/get-mauled) [![GitHub release](https://img.shields.io/github/release/malice-plugins/get-mauled.svg)](https://github.com/https://github.com/malice-plugins/get-mauled/releases/releases) [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
 
-[![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-41.5MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
+[![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-31.8MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
 
 > Download a Bunch of Malware for Demos and Testing
 

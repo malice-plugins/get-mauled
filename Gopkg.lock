@@ -73,28 +73,12 @@
   version = "v0.8.0"
 
 [[projects]]
-  digest = "1:d917313f309bda80d27274d53985bc65651f81a5b66b820749ac7f8ef061fd04"
-  name = "github.com/sergi/go-diff"
-  packages = ["diffmatchpatch"]
-  pruneopts = "UT"
-  revision = "1744e2970ca51c86172c8190fadad617561ed6e7"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "UT"
   revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
   version = "v1.0.6"
-
-[[projects]]
-  digest = "1:d888308f8887be8103266d138aecb35bc165e16b743661c060faf61d32453b4d"
-  name = "github.com/src-d/go-git"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "02c228585e543413479ea36d3a2bbc80a070eb93"
-  version = "v3.2.0"
 
 [[projects]]
   digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
@@ -106,18 +90,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cc2b551f8a67fe960ef19a146b1e90c592ba413100e667d05190e8e85b23ca34"
+  digest = "1:57fc8065a25e45bda6925e55b69a8ea2eb2e449d0bb69643346e70afd2f7d2ed"
   name = "golang.org/x/crypto"
   packages = [
     "argon2",
     "blake2b",
-    "curve25519",
-    "ed25519",
-    "ed25519/internal/edwards25519",
-    "internal/chacha20",
-    "internal/subtle",
-    "poly1305",
-    "ssh",
     "ssh/terminal",
   ]
   pruneopts = "UT"
@@ -170,46 +147,15 @@
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
-[[projects]]
-  digest = "1:6432785f8a6e930ab914151f8a89a7f3156b0981342e39b2ebc471f0f2b54cdd"
-  name = "gopkg.in/sourcegraph/go-vcsurl.v1"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "6b12603ea6fd7f84b8c90118face09df39ea10c6"
-  version = "v1"
-
-[[projects]]
-  digest = "1:93c77383a2c5bbd311ac591edd18da20b0b52ddbc6bd3b0f3e57f5aff953ba27"
-  name = "gopkg.in/src-d/go-git.v3"
-  packages = [
-    "clients",
-    "clients/common",
-    "clients/http",
-    "clients/ssh",
-    "core",
-    "diff",
-    "formats/idxfile",
-    "formats/packfile",
-    "formats/pktline",
-    "storage/memory",
-    "storage/seekable",
-    "storage/seekable/internal/gitdir",
-    "storage/seekable/internal/index",
-    "utils/fs",
-  ]
-  pruneopts = "UT"
-  revision = "02c228585e543413479ea36d3a2bbc80a070eb93"
-  version = "v3.2.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/dustin/go-humanize",
     "github.com/malice-plugins/pkgs/utils",
     "github.com/minio/minio-go",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
-    "github.com/src-d/go-git",
     "github.com/urfave/cli",
   ]
   solver-name = "gps-cdcl"

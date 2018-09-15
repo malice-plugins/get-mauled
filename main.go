@@ -15,12 +15,12 @@ import (
 	"strings"
 	"time"
 
+	humanize "github.com/dustin/go-humanize"
 	"github.com/malice-plugins/pkgs/utils"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
-	git "gopkg.in/src-d/go-git.v4"
 )
 
 const (
@@ -103,6 +103,10 @@ func FlattenDir(src string, dst string) error {
 
 // PutDir puts all files into cloud storage
 func PutDir(ctx context.Context, srcDir string) error {
+
+	var count uint64
+	var totalSize int64
+
 	err := filepath.Walk(srcDir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -113,13 +117,19 @@ func PutDir(ctx context.Context, srcDir string) error {
 				if err != nil {
 					return err
 				}
-				log.WithField("bytes", n).Debugf("wrote %s to cloud storage\n", filepath.Base(path))
+				count++
+				totalSize = totalSize + n
+				log.WithField("bytes", n).Debugf("wrote %s to cloud storage", filepath.Base(path))
 			}
 			return nil
 		})
 	if err != nil {
 		return errors.Wrapf(err, "failed to walk directory: %s", srcDir)
 	}
+	log.WithFields(log.Fields{
+		"count":      count,
+		"total_size": humanize.Bytes(uint64(totalSize)),
+	}).Info("malware successfully sent to cloud storage")
 
 	return nil
 }
@@ -160,7 +170,7 @@ func findAllZips(dir string) ([]string, error) {
 			fmt.Printf("prevent panic by handling failure accessing a path %q: %v\n", dir, err)
 			return errors.Wrapf(err, "failure accessing a path %q", dir)
 		}
-		log.Debugf("visited file: %q\n", path)
+		log.Debugf("visited file: %q", path)
 		if !info.IsDir() && (filepath.Ext(path) == ".zip" || filepath.Ext(path) == ".7z") {
 			zips = append(zips, path)
 		}
@@ -269,12 +279,12 @@ func SetUpDestination() error {
 			// Check to see if we already own this bucket (which happens if you run this twice)
 			exists, err := mc.BucketExists(maliceBucket)
 			if err == nil && exists {
-				log.Debugf("bucket %s already exists\n", maliceBucket)
+				log.Debugf("bucket %s already exists", maliceBucket)
 			} else {
 				return errors.Wrapf(err, "unable to create bucket: %s", maliceBucket)
 			}
 		}
-		log.Infof("Successfully created bucket %s\n", maliceBucket)
+		log.Infof("Successfully created bucket %s", maliceBucket)
 
 	} else if len(outputDir) > 0 {
 		if _, err = os.Stat(outputDir); os.IsNotExist(err) {
@@ -407,11 +417,30 @@ func main() {
 
 				err = downloadFromURL(theZooURL, tmpfile)
 				if err != nil {
-					return errors.Wrapf(err, "downloading %s failed", contagioDumpURL)
+					return errors.Wrapf(err, "downloading %s failed", theZooURL)
 				}
 
 				if err := tmpfile.Close(); err != nil {
 					return errors.Wrap(err, "failed to close tmp file")
+				}
+
+				zipDir, err := ioutil.TempDir("", "thezoo_zip")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(zipDir)
+
+				out, err := unzip(ctx, tmpfile.Name(), "", zipDir)
+				if err != nil {
+					return errors.Wrapf(err, "unzipping %s failed", tmpfile.Name())
+				}
+				log.Debug(out)
+				os.Remove(tmpfile.Name())
+
+				log.Debugf("looking for zips in %s", zipDir)
+				zipFiles, err := findAllZips(filepath.Join(zipDir, "theZoo-master/malwares/Binaries"))
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", zipDir)
 				}
 
 				tmpDir, err := ioutil.TempDir("", "getmauled")
@@ -419,19 +448,6 @@ func main() {
 					return errors.Wrap(err, "failed to create tmp directory")
 				}
 				defer os.RemoveAll(tmpDir)
-
-				out, err := unzip(ctx, tmpfile.Name(), "", tmpDir)
-				if err != nil {
-					return errors.Wrapf(err, "unzipping %s failed", tmpfile.Name())
-				}
-				log.Debug(out)
-				os.Remove(tmpfile.Name())
-
-				log.Debugf("looking for zips in %s\n", tmpDir)
-				zipFiles, err := findAllZips(filepath.Join(tmpDir, "theZoo-master/malwares/Binaries"))
-				if err != nil {
-					return errors.Wrapf(err, "failed to find all zips in directory: %s", tmpDir)
-				}
 
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
@@ -526,7 +542,6 @@ func main() {
 			Action: func(c *cli.Context) error {
 
 				var err error
-				var output string
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
@@ -544,28 +559,67 @@ func main() {
 					return errors.Wrap(err, "failed to setup malware destination")
 				}
 
-				cloneDir, err := ioutil.TempDir("", "clone")
+				// cloneDir, err := ioutil.TempDir("", "clone")
+				// if err != nil {
+				// 	return errors.Wrap(err, "failed to create cloneDir tmp directory")
+				// }
+				// defer os.RemoveAll(cloneDir) // clean up
+				// tmpDir, err := ioutil.TempDir("", "temp")
+				// if err != nil {
+				// 	return errors.Wrap(err, "failed to create temp tmp directory")
+				// }
+				// defer os.RemoveAll(tmpDir) // clean up
+				// // Clones the repository into the given tmpDir, just as a normal git clone does
+				// _, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
+				// 	URL: malwareSamplesURL,
+				// })
+				// if err != nil {
+				// 	return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
+				// }
+
+				// zipFiles, err := findAllZips(cloneDir)
+				// if err != nil {
+				// 	return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir)
+				// }
+
+				tmpfile, err := ioutil.TempFile("", "malware_samples")
 				if err != nil {
-					return errors.Wrap(err, "failed to create cloneDir tmp directory")
-				}
-				defer os.RemoveAll(cloneDir) // clean up
-				tmpDir, err := ioutil.TempDir("", "temp")
-				if err != nil {
-					return errors.Wrap(err, "failed to create temp tmp directory")
-				}
-				defer os.RemoveAll(tmpDir) // clean up
-				// Clones the repository into the given tmpDir, just as a normal git clone does
-				_, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
-					URL: malwareSamplesURL,
-				})
-				if err != nil {
-					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
+					return errors.Wrap(err, "failed to create tmp file")
 				}
 
-				zipFiles, err := findAllZips(cloneDir)
+				err = downloadFromURL(malwareSamplesURL, tmpfile)
 				if err != nil {
-					return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir)
+					return errors.Wrapf(err, "downloading %s failed", malwareSamplesURL)
 				}
+
+				if err := tmpfile.Close(); err != nil {
+					return errors.Wrap(err, "failed to close tmp file")
+				}
+
+				zipDir, err := ioutil.TempDir("", "malware_samples_zip")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(zipDir)
+
+				out, err := unzip(ctx, tmpfile.Name(), "", zipDir)
+				if err != nil {
+					return errors.Wrapf(err, "unzipping %s failed", tmpfile.Name())
+				}
+				log.Debug(out)
+				os.Remove(tmpfile.Name())
+
+				log.Debugf("looking for zips in %s", zipDir)
+				zipFiles, err := findAllZips(zipDir)
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", zipDir)
+				}
+
+				tmpDir, err := ioutil.TempDir("", "getmauled")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(tmpDir)
 
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
@@ -576,9 +630,10 @@ func main() {
 					log.Debug(out)
 				}
 
-				err = FlattenDir(tmpDir, output)
-
-				return nil
+				if mc != nil {
+					return PutDir(ctx, tmpDir)
+				}
+				return FlattenDir(tmpDir, outputDir)
 			},
 		},
 		{
