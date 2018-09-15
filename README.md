@@ -39,7 +39,7 @@ Usage: get-mauled [OPTIONS] COMMAND [arg...]
 
 Malice DEMO Malware Downloader Plugin
 
-Version: v0.1.5, BuildTime: 20180915
+Version: v0.1.6, BuildTime: 20180915
 
 Author:
   blacktop - <https://github.com/blacktop>
@@ -131,6 +131,28 @@ You can also watch the data stream into [elasticsearch](https://github.com/malic
 ```bash
 $ malice elk
 ```
+
+### Download malware to a [minio](https://minio.io/) server
+
+Start the `minio` server
+
+```bash
+$ docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=admin -e MINIO_SECRET_KEY=password minio/minio server /data
+```
+
+Download malware into the `malice` bucket of the `minio` instance
+
+```bash
+$ docker run --rm -it --link minio \
+         malice/get-mauled \
+         --store-url minio:9000 \
+         --store-id admin \
+         --store-key password \
+         download --password infected \
+         https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
+```
+
+Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) to see the files _(creds:**admin/password**)_
 
 ## Issues
 

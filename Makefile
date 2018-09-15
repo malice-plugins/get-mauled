@@ -37,6 +37,7 @@ tar:
 minio: stop
 	@echo " > Starting minio server"
 	@docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=admin -e MINIO_SECRET_KEY=password minio/minio server /data
+	open http://localhost:9000/minio/malice/
 
 .PHONY: test_all
 test_all: test test_minio
