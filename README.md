@@ -39,22 +39,24 @@ Usage: get-mauled [OPTIONS] COMMAND [arg...]
 
 Malice DEMO Malware Downloader Plugin
 
-Version: v0.1.6, BuildTime: 20180915
+Version: v0.1.7, BuildTime: 20180915
 
 Author:
   blacktop - <https://github.com/blacktop>
 
 Options:
-  --verbose, -V               verbose output
-  --proxy, -x                 proxy settings for Malice webhook endpoint [$MALICE_PROXY]
-  --timeout value             malice plugin timeout (in seconds) (default: 300) [$MALICE_TIMEOUT]
-  --output value, -o value    set output directory [$MALICE_OUTPUT_DIRECTORY]
-  --store-url value           s3 or minio file server url [$MALICE_STORAGE_URL]
-  --store-id value            access key is the user ID that uniquely identifies your account [$MALICE_STORAGE_ID]
-  --store-key value           secret key is the password to your account [$MALICE_STORAGE_KEY]
-  --password value, -p value  password of malware zip [$MALICE_ZIP_PASSWORD]
-  --help, -h                  show help
-  --version, -v               print the version
+  --verbose, -V             verbose output
+  --proxy, -x               proxy settings for Malice webhook endpoint [$MALICE_PROXY]
+  --timeout value           malice plugin timeout (in seconds) (default: 300) [$MALICE_TIMEOUT]
+  --output value, -o value  set output directory [$MALICE_OUTPUT_DIRECTORY]
+  --store-url value         s3 or minio file server url [$MALICE_STORAGE_URL]
+  --store-tls               enable secure (HTTPS) access [$MALICE_STORAGE_TLS]
+  --store-zone value        s3 or minio availbility zone location (default: "us-east-1") [$MALICE_STORAGE_ZONE]
+  --store-bucket value      name of the minio or s3 bucket (default: "malice") [$MALICE_STORAGE_BUCKET]
+  --store-id value          access key is the user ID that uniquely identifies your account [$MALICE_STORAGE_ID]
+  --store-key value         secret key is the password to your account [$MALICE_STORAGE_KEY]
+  --help, -h                show help
+  --version, -v             print the version
 
 Commands:
   all              Gotta' Catch Em' All

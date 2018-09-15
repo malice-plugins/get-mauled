@@ -24,7 +24,6 @@ import (
 )
 
 const (
-	maliceBucket      = "malice"
 	contagioDumpURL   = "https://www.dropbox.com/sh/i6ed6v32x0fp94z/AAAQvOsOvbWrOs8T3_ZTXqQya?dl=1"
 	theZooURL         = "https://github.com/ytisf/theZoo/archive/master.zip"
 	malwareSamplesURL = "https://github.com/fabrimagic72/malware-samples/archive/master.zip"
@@ -40,10 +39,13 @@ var (
 	// local storage
 	outputDir string
 	// cloud storage
-	storageURL string
-	storageID  string
-	storageKey string
-	mc         *minio.Client
+	storageURL    string
+	storageTLS    bool
+	storageZone   string
+	storageBucket string
+	storageID     string
+	storageKey    string
+	mc            *minio.Client
 )
 
 // Copy copies a file from src to dst
@@ -113,7 +115,7 @@ func PutDir(ctx context.Context, srcDir string) error {
 				return errors.Wrapf(err, "failed to get info on file: %s", path)
 			}
 			if !info.IsDir() {
-				n, err := mc.FPutObjectWithContext(ctx, maliceBucket, filepath.Base(path), path, minio.PutObjectOptions{})
+				n, err := mc.FPutObjectWithContext(ctx, storageBucket, filepath.Base(path), path, minio.PutObjectOptions{})
 				if err != nil {
 					return errors.Wrapf(err, "failed to write %s to cloud storage", filepath.Base(path))
 				}
@@ -266,24 +268,22 @@ func SetUpDestination() error {
 	var err error
 
 	if len(storageURL) > 0 {
-		useSSL := false
-		mc, err = minio.New(storageURL, storageID, storageKey, useSSL)
+		mc, err = minio.New(storageURL, storageID, storageKey, storageTLS)
 		if err != nil {
 			return errors.Wrap(err, "unable to create s3/minio client")
 		}
 
-		location := "us-east-1"
-		err = mc.MakeBucket(maliceBucket, location)
+		err = mc.MakeBucket(storageBucket, storageZone)
 		if err != nil {
 			// Check to see if we already own this bucket (which happens if you run this twice)
-			exists, err := mc.BucketExists(maliceBucket)
+			exists, err := mc.BucketExists(storageBucket)
 			if err == nil && exists {
-				log.Debugf("bucket %s already exists", maliceBucket)
+				log.Debugf("bucket %s already exists", storageBucket)
 			} else {
-				return errors.Wrapf(err, "unable to create bucket: %s", maliceBucket)
+				return errors.Wrapf(err, "unable to create bucket: %s", storageBucket)
 			}
 		}
-		log.Infof("Successfully created bucket %s", maliceBucket)
+		log.Infof("Successfully created bucket %s", storageBucket)
 
 	} else if len(outputDir) > 0 {
 		if _, err = os.Stat(outputDir); os.IsNotExist(err) {
@@ -336,6 +336,26 @@ func main() {
 			Usage:       "s3 or minio file server url",
 			EnvVar:      "MALICE_STORAGE_URL",
 			Destination: &storageURL,
+		},
+		cli.BoolFlag{
+			Name:        "store-tls",
+			Usage:       "enable secure (HTTPS) access",
+			EnvVar:      "MALICE_STORAGE_TLS",
+			Destination: &storageTLS,
+		},
+		cli.StringFlag{
+			Name:        "store-zone",
+			Value:       "us-east-1",
+			Usage:       "s3 or minio availbility zone location",
+			EnvVar:      "MALICE_STORAGE_ZONE",
+			Destination: &storageZone,
+		},
+		cli.StringFlag{
+			Name:        "store-bucket",
+			Value:       "malice",
+			Usage:       "name of the minio or s3 bucket",
+			EnvVar:      "MALICE_STORAGE_BUCKET",
+			Destination: &storageBucket,
 		},
 		cli.StringFlag{
 			Name:        "store-id",
