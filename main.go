@@ -350,11 +350,6 @@ func main() {
 			EnvVar:      "MALICE_STORAGE_KEY",
 			Destination: &storageKey,
 		},
-		cli.StringFlag{
-			Name:   "password, p",
-			Usage:  "password of malware zip",
-			EnvVar: "MALICE_ZIP_PASSWORD",
-		},
 	}
 	app.Commands = []cli.Command{
 		{
@@ -363,23 +358,23 @@ func main() {
 			Usage:   "Gotta' Catch Em' All",
 			Action: func(c *cli.Context) error {
 
-				var err error
+				// var err error
 
-				if c.GlobalBool("verbose") {
-					log.SetLevel(log.DebugLevel)
-				}
+				// if c.GlobalBool("verbose") {
+				// 	log.SetLevel(log.DebugLevel)
+				// }
 
-				if !exists("7z") {
-					return fmt.Errorf("you need to install 7zip to use get-mauled")
-				}
+				// if !exists("7z") {
+				// 	return fmt.Errorf("you need to install 7zip to use get-mauled")
+				// }
 
 				// ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				// defer cancel()
 
-				err = SetUpDestination()
-				if err != nil {
-					return errors.Wrap(err, "failed to setup malware destination")
-				}
+				// err = SetUpDestination()
+				// if err != nil {
+				// 	return errors.Wrap(err, "failed to setup malware destination")
+				// }
 
 				log.Error("this command hasn't been implimented yet")
 
@@ -471,7 +466,6 @@ func main() {
 			Action: func(c *cli.Context) error {
 
 				var err error
-				var output string
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
@@ -504,23 +498,31 @@ func main() {
 					return errors.Wrap(err, "failed to close tmp file")
 				}
 
-				tmpDir, err := ioutil.TempDir("", "getmauled")
+				zipDir, err := ioutil.TempDir("", "contagio_zip")
 				if err != nil {
 					return errors.Wrap(err, "failed to create tmp directory")
 				}
-				defer os.RemoveAll(tmpDir)
+				defer os.RemoveAll(zipDir)
 
-				out, err := unzip(ctx, tmpfile.Name(), "", tmpDir)
+				out, err := unzip(ctx, tmpfile.Name(), "", zipDir)
 				if err != nil {
 					return errors.Wrapf(err, "unzipping %s failed", tmpfile.Name())
 				}
 				log.Debug(out)
 				os.Remove(tmpfile.Name())
 
-				zipFiles, err := findAllZips(tmpDir)
+				log.Debugf("looking for zips in %s", zipDir)
+				zipFiles, err := findAllZips(zipDir)
 				if err != nil {
-					return errors.Wrapf(err, "failed to find all zips in directory: %s", tmpDir)
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", zipDir)
 				}
+
+				tmpDir, err := ioutil.TempDir("", "getmauled")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(tmpDir)
+
 				for _, zipFile := range zipFiles {
 					fmt.Println(zipFile)
 					out, _ := unzip(ctx, zipFile, getPassword(zipFile), tmpDir)
@@ -530,9 +532,10 @@ func main() {
 					log.Debug(out)
 				}
 
-				err = FlattenDir(tmpDir, output)
-
-				return nil
+				if mc != nil {
+					return PutDir(ctx, tmpDir)
+				}
+				return FlattenDir(tmpDir, outputDir)
 			},
 		},
 		{
@@ -558,29 +561,6 @@ func main() {
 				if err != nil {
 					return errors.Wrap(err, "failed to setup malware destination")
 				}
-
-				// cloneDir, err := ioutil.TempDir("", "clone")
-				// if err != nil {
-				// 	return errors.Wrap(err, "failed to create cloneDir tmp directory")
-				// }
-				// defer os.RemoveAll(cloneDir) // clean up
-				// tmpDir, err := ioutil.TempDir("", "temp")
-				// if err != nil {
-				// 	return errors.Wrap(err, "failed to create temp tmp directory")
-				// }
-				// defer os.RemoveAll(tmpDir) // clean up
-				// // Clones the repository into the given tmpDir, just as a normal git clone does
-				// _, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
-				// 	URL: malwareSamplesURL,
-				// })
-				// if err != nil {
-				// 	return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
-				// }
-
-				// zipFiles, err := findAllZips(cloneDir)
-				// if err != nil {
-				// 	return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir)
-				// }
 
 				tmpfile, err := ioutil.TempFile("", "malware_samples")
 				if err != nil {

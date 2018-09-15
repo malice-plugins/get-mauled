@@ -52,7 +52,7 @@ test:
 .PHONY: test_minio
 test_minio: minio
 	@echo " > testing ${NAME} with minio"
-	# docker run --rm -it --link minio -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V --store-url minio:9000 --store-id admin --store-key password download --password infected https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
+	docker run --rm -it --link minio -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V --store-url minio:9000 --store-id admin --store-key password download --password infected https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 	docker run --rm -it --link minio -v $(PWD)/tests:/malware $(ORG)/$(NAME):$(VERSION) -V --store-url minio:9000 --store-id admin --store-key password malware-samples https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 
 .PHONY: stop
