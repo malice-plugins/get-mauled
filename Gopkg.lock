@@ -2,20 +2,51 @@
 
 
 [[projects]]
-  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
-  name = "github.com/Sirupsen/logrus"
+  branch = "master"
+  digest = "1:6f9339c912bbdda81302633ad7e99a28dfa5a639c864061f1929510a9a64aa74"
+  name = "github.com/dustin/go-humanize"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
-  version = "v1.0.6"
+  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
 [[projects]]
-  branch = "master"
-  digest = "1:fc893c4ab6c9cab25eb4cd7d1e6e77235728196ec76c1b9a4e684088b62939a2"
-  name = "github.com/malice-plugins/go-plugin-utils"
+  digest = "1:5abd6a22805b1919f6a6bca0ae58b13cef1f3412812f38569978f43ef02743d4"
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5cf292cae48347c2490ac1a58fe36735fb78df7e"
+  version = "v1.38.2"
+
+[[projects]]
+  digest = "1:8f69f80d3d3069fc163b4654fea6750954f0f2b06ac61aa5c5375906c53ff701"
+  name = "github.com/malice-plugins/pkgs"
   packages = ["utils"]
   pruneopts = "UT"
-  revision = "7663d6b3aa7fe4667f78de3e5ea8951566817682"
+  revision = "f4521907f7317e9453ce50707013f1fc92ab3b89"
+  version = "0.1.1"
+
+[[projects]]
+  digest = "1:d8131341a6fdbba8c26b5a3544a51100392527688164c3475efeb70f6fb5613d"
+  name = "github.com/minio/minio-go"
+  packages = [
+    ".",
+    "pkg/credentials",
+    "pkg/encrypt",
+    "pkg/s3signer",
+    "pkg/s3utils",
+    "pkg/set",
+  ]
+  pruneopts = "UT"
+  revision = "519049881e73150d1bbeac1d443e7c96b76e1b8d"
+  version = "v6.0.6"
+
+[[projects]]
+  digest = "1:78bbb1ba5b7c3f2ed0ea1eab57bdd3859aec7e177811563edc41198a760b06af"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -50,6 +81,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:d867dfa6751c8d7a435821ad3b736310c2ed68945d05b50fb9d23aee0540c8cc"
+  name = "github.com/sirupsen/logrus"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
+
+[[projects]]
   digest = "1:d888308f8887be8103266d138aecb35bc165e16b743661c060faf61d32453b4d"
   name = "github.com/src-d/go-git"
   packages = ["."]
@@ -67,9 +106,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:10e257965f5774c1ef03b258130a6caa8dddbfe03041f69d7c16a00463dece62"
+  digest = "1:cc2b551f8a67fe960ef19a146b1e90c592ba413100e667d05190e8e85b23ca34"
   name = "golang.org/x/crypto"
   packages = [
+    "argon2",
+    "blake2b",
     "curve25519",
     "ed25519",
     "ed25519/internal/edwards25519",
@@ -80,29 +121,31 @@
     "ssh/terminal",
   ]
   pruneopts = "UT"
-  revision = "aabede6cba87e37f413b3e60ebfc214f8eeca1b0"
+  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [[projects]]
   branch = "master"
-  digest = "1:a412caf33b5d3c7938c28e1e745c10664bd180277b73ab3b34c0c467886f9969"
+  digest = "1:c0b414c0a93b206abfd40c4e72f9c8e022c6e14a16a66724a0dd80fe200e984c"
   name = "golang.org/x/net"
   packages = [
+    "http/httpguts",
     "idna",
     "publicsuffix",
   ]
   pruneopts = "UT"
-  revision = "aaf60122140d3fcf75376d319f0554393160eb50"
+  revision = "26e67e76b6c3f6ce91f7c52def5af501b4e0f3a2"
 
 [[projects]]
   branch = "master"
-  digest = "1:2f71657f09ff05e4567909e9e0de7ad799828c96d402c540b41dc044a6590fb2"
+  digest = "1:388eb79cea3ef5353f6b08a7d8549eedd1bc17c30fcb7020a252cee50ce6bda4"
   name = "golang.org/x/sys"
   packages = [
+    "cpu",
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded"
+  revision = "d0be0721c37eeb5299f245a996a483160fc36940"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -162,9 +205,10 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Sirupsen/logrus",
-    "github.com/malice-plugins/go-plugin-utils/utils",
+    "github.com/malice-plugins/pkgs/utils",
+    "github.com/minio/minio-go",
     "github.com/pkg/errors",
+    "github.com/sirupsen/logrus",
     "github.com/src-d/go-git",
     "github.com/urfave/cli",
   ]

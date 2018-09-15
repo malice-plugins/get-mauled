@@ -15,18 +15,19 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/malice-plugins/go-plugin-utils/utils"
+	"github.com/malice-plugins/pkgs/utils"
+	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
-	git "gopkg.in/src-d/go-git.v4"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	git "gopkg.in/src-d/go-git.v4"
 )
 
 const (
+	maliceBucket      = "malice"
 	contagioDumpURL   = "https://www.dropbox.com/sh/i6ed6v32x0fp94z/AAAQvOsOvbWrOs8T3_ZTXqQya?dl=1"
-	theZooURL         = "https://github.com/ytisf/theZoo.git"
-	malwareSamplesURL = "https://github.com/fabrimagic72/malware-samples.git"
+	theZooURL         = "https://github.com/ytisf/theZoo/archive/master.zip"
+	malwareSamplesURL = "https://github.com/fabrimagic72/malware-samples/archive/master.zip"
 )
 
 var (
@@ -35,6 +36,14 @@ var (
 
 	// BuildTime stores the plugin's build time
 	BuildTime string
+
+	// local storage
+	outputDir string
+	// cloud storage
+	storageURL string
+	storageID  string
+	storageKey string
+	mc         *minio.Client
 )
 
 // Copy copies a file from src to dst
@@ -92,6 +101,29 @@ func FlattenDir(src string, dst string) error {
 	return nil
 }
 
+// PutDir puts all files into cloud storage
+func PutDir(ctx context.Context, srcDir string) error {
+	err := filepath.Walk(srcDir,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return errors.Wrapf(err, "failed to get info on file: %s", path)
+			}
+			if !info.IsDir() {
+				n, err := mc.FPutObjectWithContext(ctx, maliceBucket, filepath.Base(path), path, minio.PutObjectOptions{})
+				if err != nil {
+					return err
+				}
+				log.WithField("bytes", n).Debugf("wrote %s to cloud storage\n", filepath.Base(path))
+			}
+			return nil
+		})
+	if err != nil {
+		return errors.Wrapf(err, "failed to walk directory: %s", srcDir)
+	}
+
+	return nil
+}
+
 func downloadFromURL(url string, tmpfile *os.File) error {
 	// Download file
 	log.Info("Downloading file: ", url)
@@ -141,6 +173,7 @@ func findAllZips(dir string) ([]string, error) {
 
 	return zips, nil
 }
+
 func unzip(ctx context.Context, path, password, outputFolder string) (string, error) {
 	var c *exec.Cmd
 	var args []string
@@ -152,9 +185,9 @@ func unzip(ctx context.Context, path, password, outputFolder string) (string, er
 	}
 
 	if ctx != nil {
-		c = exec.CommandContext(ctx, "/usr/bin/7z", args...)
+		c = exec.CommandContext(ctx, "7z", args...)
 	} else {
-		c = exec.Command("/usr/bin/7z", args...)
+		c = exec.Command("7z", args...)
 	}
 
 	log.Debug("running command: ", c.Args)
@@ -174,7 +207,7 @@ func unzip(ctx context.Context, path, password, outputFolder string) (string, er
 	return string(output), nil
 }
 
-func downloadAndUnzip(ctx context.Context, url, password, output string) error {
+func downloadAndUnzip(ctx context.Context, url, password string) error {
 
 	tmpfile, err := ioutil.TempFile("", "getmauled")
 	if err != nil {
@@ -203,8 +236,56 @@ func downloadAndUnzip(ctx context.Context, url, password, output string) error {
 	}
 	log.Debug(out)
 
-	err = FlattenDir(tmpDir, output)
+	if mc != nil {
+		return PutDir(ctx, tmpDir)
+	}
+	return FlattenDir(tmpDir, outputDir)
+}
 
+func exists(file string) bool {
+	for _, p := range strings.Split(os.Getenv("PATH"), ":") {
+		_, err := os.Stat(filepath.Join(p, file))
+		if err == nil {
+			return true
+		}
+	}
+	return false
+}
+
+// SetUpDestination configures the malware destination
+func SetUpDestination() error {
+	var err error
+
+	if len(storageURL) > 0 {
+		useSSL := false
+		mc, err = minio.New(storageURL, storageID, storageKey, useSSL)
+		if err != nil {
+			return errors.Wrap(err, "unable to create s3/minio client")
+		}
+
+		location := "us-east-1"
+		err = mc.MakeBucket(maliceBucket, location)
+		if err != nil {
+			// Check to see if we already own this bucket (which happens if you run this twice)
+			exists, err := mc.BucketExists(maliceBucket)
+			if err == nil && exists {
+				log.Debugf("bucket %s already exists\n", maliceBucket)
+			} else {
+				return errors.Wrapf(err, "unable to create bucket: %s", maliceBucket)
+			}
+		}
+		log.Infof("Successfully created bucket %s\n", maliceBucket)
+
+	} else if len(outputDir) > 0 {
+		if _, err = os.Stat(outputDir); os.IsNotExist(err) {
+			return errors.Wrapf(err, "directory %s doesn't exist", outputDir)
+		}
+	} else {
+		outputDir, err = os.Getwd()
+		if err != nil {
+			return errors.Wrap(err, "unable to get current working directory")
+		}
+	}
 	return nil
 }
 
@@ -235,45 +316,59 @@ func main() {
 			Usage:  "malice plugin timeout (in seconds)",
 			EnvVar: "MALICE_TIMEOUT",
 		},
+		cli.StringFlag{
+			Name:        "output, o",
+			Usage:       "set output directory",
+			EnvVar:      "MALICE_OUTPUT_DIRECTORY",
+			Destination: &outputDir,
+		},
+		cli.StringFlag{
+			Name:        "store-url",
+			Usage:       "s3 or minio file server url",
+			EnvVar:      "MALICE_STORAGE_URL",
+			Destination: &storageURL,
+		},
+		cli.StringFlag{
+			Name:        "store-id",
+			Usage:       "access key is the user ID that uniquely identifies your account",
+			EnvVar:      "MALICE_STORAGE_ID",
+			Destination: &storageID,
+		},
+		cli.StringFlag{
+			Name:        "store-key",
+			Usage:       "secret key is the password to your account",
+			EnvVar:      "MALICE_STORAGE_KEY",
+			Destination: &storageKey,
+		},
+		cli.StringFlag{
+			Name:   "password, p",
+			Usage:  "password of malware zip",
+			EnvVar: "MALICE_ZIP_PASSWORD",
+		},
 	}
 	app.Commands = []cli.Command{
 		{
 			Name:    "all",
 			Aliases: []string{"a"},
 			Usage:   "Gotta' Catch Em' All",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "output, o",
-					Usage:  "set output directory",
-					EnvVar: "MALICE_OUTPUT_DIRECTORY",
-				},
-			},
 			Action: func(c *cli.Context) error {
 
 				var err error
-				var output string
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
-					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				if !exists("7z") {
+					return fmt.Errorf("you need to install 7zip to use get-mauled")
 				}
 
 				// ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				// defer cancel()
 
-				if len(c.String("output")) > 0 {
-					output = c.String("output")
-					if _, err = os.Stat(output); os.IsNotExist(err) {
-						return errors.Wrapf(err, "directory %s doesn't exist", output)
-					}
-				} else {
-					output, err = os.Getwd()
-					if err != nil {
-						return errors.Wrap(err, "unable to get current working directory")
-					}
+				err = SetUpDestination()
+				if err != nil {
+					return errors.Wrap(err, "failed to setup malware destination")
 				}
 
 				log.Error("this command hasn't been implimented yet")
@@ -285,62 +380,57 @@ func main() {
 			Name:    "the-zoo",
 			Aliases: []string{"z"},
 			Usage:   "Download and Unzip The Zoo Malware",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "output, o",
-					Usage:  "set output directory",
-					EnvVar: "MALICE_OUTPUT_DIRECTORY",
-				},
-			},
 			Action: func(c *cli.Context) error {
 
 				var err error
-				var output string
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
-					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				if !exists("7z") {
+					return fmt.Errorf("you need to install 7zip to use get-mauled")
 				}
 
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				defer cancel()
 
-				if len(c.String("output")) > 0 {
-					output = c.String("output")
-					if _, err = os.Stat(output); os.IsNotExist(err) {
-						return errors.Wrapf(err, "directory %s doesn't exist", output)
-					}
-				} else {
-					output, err = os.Getwd()
-					if err != nil {
-						return errors.Wrap(err, "unable to get current working directory")
-					}
+				err = SetUpDestination()
+				if err != nil {
+					return errors.Wrap(err, "failed to setup malware destination")
 				}
 
-				cloneDir, err := ioutil.TempDir("", "clone")
+				tmpfile, err := ioutil.TempFile("", "thezoo")
 				if err != nil {
-					return errors.Wrap(err, "failed to create cloneDir tmp directory")
-				}
-				defer os.RemoveAll(cloneDir) // clean up
-				tmpDir, err := ioutil.TempDir("", "temp")
-				if err != nil {
-					return errors.Wrap(err, "failed to create temp tmp directory")
-				}
-				defer os.RemoveAll(tmpDir) // clean up
-				// Clones the repository into the given tmpDir, just as a normal git clone does
-				_, err = git.PlainClone(cloneDir, false, &git.CloneOptions{
-					URL: theZooURL,
-				})
-				if err != nil {
-					return errors.Wrapf(err, "failed to clone from URL %s", malwareSamplesURL)
+					return errors.Wrap(err, "failed to create tmp file")
 				}
 
-				zipFiles, err := findAllZips(cloneDir + "/malwares/Binaries")
+				err = downloadFromURL(theZooURL, tmpfile)
 				if err != nil {
-					return errors.Wrapf(err, "failed to find all zips in directory: %s", cloneDir+"/malwares/Binaries")
+					return errors.Wrapf(err, "downloading %s failed", contagioDumpURL)
+				}
+
+				if err := tmpfile.Close(); err != nil {
+					return errors.Wrap(err, "failed to close tmp file")
+				}
+
+				tmpDir, err := ioutil.TempDir("", "getmauled")
+				if err != nil {
+					return errors.Wrap(err, "failed to create tmp directory")
+				}
+				defer os.RemoveAll(tmpDir)
+
+				out, err := unzip(ctx, tmpfile.Name(), "", tmpDir)
+				if err != nil {
+					return errors.Wrapf(err, "unzipping %s failed", tmpfile.Name())
+				}
+				log.Debug(out)
+				os.Remove(tmpfile.Name())
+
+				log.Debugf("looking for zips in %s\n", tmpDir)
+				zipFiles, err := findAllZips(filepath.Join(tmpDir, "theZoo-master/malwares/Binaries"))
+				if err != nil {
+					return errors.Wrapf(err, "failed to find all zips in directory: %s", tmpDir)
 				}
 
 				for _, zipFile := range zipFiles {
@@ -352,22 +442,16 @@ func main() {
 					log.Debug(out)
 				}
 
-				err = FlattenDir(tmpDir, output)
-
-				return nil
+				if mc != nil {
+					return PutDir(ctx, tmpDir)
+				}
+				return FlattenDir(tmpDir, outputDir)
 			},
 		},
 		{
 			Name:    "contagio",
 			Aliases: []string{"c"},
 			Usage:   "Download and Unzip contagiodump Malware",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "output, o",
-					Usage:  "set output directory",
-					EnvVar: "MALICE_OUTPUT_DIRECTORY",
-				},
-			},
 			Action: func(c *cli.Context) error {
 
 				var err error
@@ -377,24 +461,17 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
-					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				if !exists("7z") {
+					return fmt.Errorf("you need to install 7zip to use get-mauled")
 				}
 
 				// increase timeout because it's downloading ~3GBs
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*30*time.Second)
 				defer cancel()
 
-				if len(c.String("output")) > 0 {
-					output = c.String("output")
-					if _, err = os.Stat(output); os.IsNotExist(err) {
-						return errors.Wrapf(err, "directory %s doesn't exist", output)
-					}
-				} else {
-					output, err = os.Getwd()
-					if err != nil {
-						return errors.Wrap(err, "unable to get current working directory")
-					}
+				err = SetUpDestination()
+				if err != nil {
+					return errors.Wrap(err, "failed to setup malware destination")
 				}
 
 				tmpfile, err := ioutil.TempFile("", "contagio")
@@ -446,13 +523,6 @@ func main() {
 			Name:    "malware-samples",
 			Aliases: []string{"m"},
 			Usage:   "Download and Unzip Malware Samples",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name:   "output, o",
-					Usage:  "set output directory",
-					EnvVar: "MALICE_OUTPUT_DIRECTORY",
-				},
-			},
 			Action: func(c *cli.Context) error {
 
 				var err error
@@ -462,23 +532,16 @@ func main() {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
-					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				if !exists("7z") {
+					return fmt.Errorf("you need to install 7zip to use get-mauled")
 				}
 
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				defer cancel()
 
-				if len(c.String("output")) > 0 {
-					output = c.String("output")
-					if _, err = os.Stat(output); os.IsNotExist(err) {
-						return errors.Wrapf(err, "directory %s doesn't exist", output)
-					}
-				} else {
-					output, err = os.Getwd()
-					if err != nil {
-						return errors.Wrap(err, "unable to get current working directory")
-					}
+				err = SetUpDestination()
+				if err != nil {
+					return errors.Wrap(err, "failed to setup malware destination")
 				}
 
 				cloneDir, err := ioutil.TempDir("", "clone")
@@ -524,48 +587,34 @@ func main() {
 			Usage:     "Download and Unzip Malware From URL",
 			ArgsUsage: "url-to-download",
 			Flags: []cli.Flag{
-
 				cli.StringFlag{
 					Name:   "password, p",
 					Usage:  "password of malware zip",
 					EnvVar: "MALICE_ZIP_PASSWORD",
 				},
-				cli.StringFlag{
-					Name:   "output, o",
-					Usage:  "set output directory",
-					EnvVar: "MALICE_OUTPUT_DIRECTORY",
-				},
 			},
 			Action: func(c *cli.Context) error {
 
 				var err error
-				var output string
 
 				if c.GlobalBool("verbose") {
 					log.SetLevel(log.DebugLevel)
 				}
 
-				if _, err = os.Stat("/usr/bin/7z"); os.IsNotExist(err) {
-					return errors.Wrap(err, "you need to install 7zip to use get-mauled")
+				if !exists("7z") {
+					return fmt.Errorf("you need to install 7zip to use get-mauled")
 				}
 
 				ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.GlobalInt("timeout"))*time.Second)
 				defer cancel()
 
-				if len(c.String("output")) > 0 {
-					output = c.String("output")
-					if _, err = os.Stat(output); os.IsNotExist(err) {
-						return errors.Wrapf(err, "directory %s doesn't exist", output)
-					}
-				} else {
-					output, err = os.Getwd()
-					if err != nil {
-						return errors.Wrap(err, "unable to get current working directory")
-					}
+				err = SetUpDestination()
+				if err != nil {
+					return errors.Wrap(err, "failed to setup malware destination")
 				}
 
 				if c.Args().Present() {
-					err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"), output)
+					err = downloadAndUnzip(ctx, c.Args().First(), c.String("password"))
 					if err != nil {
 						log.Fatal(err)
 					}
