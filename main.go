@@ -78,7 +78,7 @@ func FlattenDir(src string, dst string) error {
 	var fds []os.FileInfo
 
 	if fds, err = ioutil.ReadDir(src); err != nil {
-		return err
+		return errors.Wrapf(err, "failed to read dir %s", src)
 	}
 	for _, fd := range fds {
 		srcfp := path.Join(src, fd.Name())
@@ -115,7 +115,7 @@ func PutDir(ctx context.Context, srcDir string) error {
 			if !info.IsDir() {
 				n, err := mc.FPutObjectWithContext(ctx, maliceBucket, filepath.Base(path), path, minio.PutObjectOptions{})
 				if err != nil {
-					return err
+					return errors.Wrapf(err, "failed to write %s to cloud storage", filepath.Base(path))
 				}
 				count++
 				totalSize = totalSize + n
@@ -177,7 +177,7 @@ func findAllZips(dir string) ([]string, error) {
 		return nil
 	})
 	if err != nil {
-		return []string{}, err
+		return []string{}, errors.Wrapf(err, "failed to walk dir %s", dir)
 	}
 
 	return zips, nil
