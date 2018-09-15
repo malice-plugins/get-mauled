@@ -67,10 +67,17 @@ stop:
 dry_release:
 	goreleaser --skip-publish --rm-dist --skip-validate
 
+.PHONY: bump
+bump: ## Incriment version patch number
+	@echo " > Bumping VERSION"
+	@hack/bump/version -p $(shell cat VERSION) > VERSION
+	@git commit -am "bumping version to $(VERSION)"
+	@git push
+
 .PHONY: release
-release: ## Create a new release from the VERSION
+release: bump ## Create a new release from the VERSION
 	@echo " > Creating Release"
-	@hack/make/release ${VERSION}
+	@hack/make/release $(shell cat VERSION)
 	@goreleaser --rm-dist
 
 .PHONY: circle
