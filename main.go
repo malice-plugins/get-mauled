@@ -359,7 +359,7 @@ func main() {
 		},
 		cli.StringFlag{
 			Name:        "store-id",
-			Usage:       "access key is the user ID that uniquely identifies your account",
+			Usage:       "user ID that uniquely identifies your account",
 			EnvVar:      "MALICE_STORAGE_ID",
 			Destination: &storageID,
 		},
