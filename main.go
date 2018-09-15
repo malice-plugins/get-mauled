@@ -312,7 +312,7 @@ func main() {
 		},
 		cli.IntFlag{
 			Name:   "timeout",
-			Value:  60,
+			Value:  60 * 5,
 			Usage:  "malice plugin timeout (in seconds)",
 			EnvVar: "MALICE_TIMEOUT",
 		},

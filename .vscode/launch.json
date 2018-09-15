@@ -27,7 +27,16 @@
       "host": "127.0.0.1",
       "program": "${workspaceRoot}/main.go",
       "env": {},
-      "args": ["-V", "the-zoo"],
+      "args": [
+        "-V",
+        "--store-url",
+        "localhost:9000",
+        "--store-id",
+        "admin",
+        "--store-key",
+        "password",
+        "the-zoo"
+      ],
       "showLog": true
     },
     {
