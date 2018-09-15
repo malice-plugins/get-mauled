@@ -139,7 +139,11 @@ $ malice elk
 Start the `minio` server
 
 ```bash
-$ docker run -d --name minio -p 9000:9000 -e MINIO_ACCESS_KEY=admin -e MINIO_SECRET_KEY=password minio/minio server /data
+$ docker run -d --name minio \
+             -p 9000:9000 \
+             -e MINIO_ACCESS_KEY=admin \
+             -e MINIO_SECRET_KEY=password \
+             minio/minio server /data
 ```
 
 Download malware into the `malice` bucket of the `minio` instance
