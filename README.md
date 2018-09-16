@@ -1,10 +1,34 @@
-![get-mauled logo](https://github.com/malice-plugins/get-mauled/blob/master/docs/maul-logo.png)
+<p align="center">
+    <a href="#"><img src="./docs/maul-logo.png" height="70" /></a>
+</p><br/>
 
-# get-mauled
+<h1 align="center">
+    get-mauled
+</h1>
+<br/>
 
-[![Circle CI](https://circleci.com/gh/malice-plugins/get-mauled.png?style=shield)](https://circleci.com/gh/malice-plugins/get-mauled) [![Github All Releases](https://img.shields.io/github/downloads/malice-plugins/get-mauled/total.svg)](https://github.com/malice-plugins/get-mauled) [![GitHub release](https://img.shields.io/github/release/malice-plugins/get-mauled.svg)](https://github.com/https://github.com/malice-plugins/get-mauled/releases/releases) [![License](http://img.shields.io/:license-mit-blue.svg)](http://doge.mit-license.org)
+<p align="center">
+    <a href="#installation"><strong>Install</strong></a> ·
+    <a href="#usage"><strong>Usage</strong></a> ·
+    <a href="#contributing"><strong>Contribute</strong></a>
+</p>
+<br/>
 
-[![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-31.8MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
+<p align="center">
+    <a href="https://circleci.com/gh/malice-plugins/get-mauled">
+        <img src="https://circleci.com/gh/malice-plugins/get-mauled.png?style=shield" alt="Build">
+    </a>
+    <a href="https://github.com/https://github.com/malice-plugins/get-mauled/releases/releases">
+        <img src="https://img.shields.io/github/downloads/malice-plugins/get-mauled/total.svg">
+    </a>
+    <a href="https://github.com/https://github.com/malice-plugins/get-mauled/releases/releases">
+        <img src="https://img.shields.io/github/release/malice-plugins/get-mauled.svg">
+    </a>
+    <a href="http://doge.mit-license.org">
+        <img src="http://img.shields.io/:license-mit-blue.svg">
+    </a>
+</p>
+<br/>
 
 > Download a Bunch of Malware for Demos and Testing
 
@@ -17,12 +41,16 @@
 
 ## Installation
 
-1. Install [Docker](https://www.docker.io/).
-2. Download [trusted build](https://hub.docker.com/r/malice/get-mauled/) from public [DockerHub](https://hub.docker.com): `docker pull malice/get-mauled`
-
-=OR=
+### Binary
 
 Download binary: https://github.com/malice-plugins/get-mauled/releases
+
+### Docker
+
+[![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-31.8MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
+
+1. Install [Docker](https://www.docker.io/).
+2. Download [trusted build](https://hub.docker.com/r/malice/get-mauled/) from public [DockerHub](https://hub.docker.com): `docker pull malice/get-mauled`
 
 ## Usage
 
@@ -108,32 +136,6 @@ ls -lah /path/to/malware
 -rw-r--r--   1 blacktop  staff    25K Aug 13 22:49 e83c6c36dbd143ee0fd36aff30fb43529a34129817dc2530f251121527cbf4b4
 ```
 
-### Use with [MaliceIO](https://github.com/maliceio/malice)
-
-Tell MaliceIO to watch the current directory
-
-```bash
-$ malice watch .
-```
-
-Use `get-mauled` to download to the current directory
-
-```bash
-$ docker run --rm -it -v `pwd`:/malware malice/get-mauled the-zoo
-```
-
-Watch the fun begin :sunglasses: in another terminal
-
-```bash
-$ watch -n1 docker ps -a
-```
-
-You can also watch the data stream into [elasticsearch](https://github.com/maliceio/elasticsearch) by checking out the [kibana](https://github.com/maliceio/kibana) UI
-
-```bash
-$ malice elk
-```
-
 ### Download malware to a [minio](https://minio.io/) server
 
 Start the `minio` server
@@ -159,6 +161,32 @@ $ docker run --rm -it --link minio \
 ```
 
 Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) to see the files _(creds:**admin/password**)_
+
+### Use with [MaliceIO](https://github.com/maliceio/malice)
+
+Tell MaliceIO to watch the current directory
+
+```bash
+$ malice watch .
+```
+
+Use `get-mauled` to download to the current directory
+
+```bash
+$ docker run --rm -it -v `pwd`:/malware malice/get-mauled the-zoo
+```
+
+Watch the fun begin :sunglasses: in another terminal
+
+```bash
+$ watch -n1 docker ps -a
+```
+
+You can also watch the data stream into [elasticsearch](https://github.com/maliceio/elasticsearch) by checking out the [kibana](https://github.com/maliceio/kibana) UI
+
+```bash
+$ malice elk
+```
 
 ## Issues
 
