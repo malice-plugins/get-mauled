@@ -157,6 +157,8 @@ $ docker run --rm -it --link minio \
 
 Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) to see the files _(creds:**admin/password**)_
 
+![minio](https://raw.githubusercontent.com/malice-plugins/get-mauled/master/docs/minio.png)
+
 ## Use with [MaliceIO](https://github.com/maliceio/malice)
 
 Tell MaliceIO to watch the current directory
