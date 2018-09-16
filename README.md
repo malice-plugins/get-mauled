@@ -1,6 +1,11 @@
 <p align="center">
-    <a href="#"><img src="./docs/maul-logo.png" height="140" /></a>
+    <a href="#"><img src="./docs/maul-logo.png" height="200" /></a>
 </p><br/>
+
+<p align="center">
+    Download a Bunch of Malware for Demos and Testing.
+</p>
+<br/>
 
 <p align="center">
     <a href="#installation"><strong>Install</strong></a> ·
@@ -25,26 +30,24 @@
 </p>
 <br/>
 
-> Download a Bunch of Malware for Demos and Testing
+# Installation
 
-## Installation
-
-### Dependencies
+## Dependencies
 
 - [7zip](https://www.7-zip.org/download.html)
 
-### Use Binary
+## Use Binary
 
 Download from [releases](https://github.com/malice-plugins/get-mauled/releases)
 
-### Use Docker
+## Use Docker
 
 [![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-31.8MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
 
 1. Install [Docker](https://www.docker.io/).
 2. Download [trusted build](https://hub.docker.com/r/malice/get-mauled/) from public [DockerHub](https://hub.docker.com): `docker pull malice/get-mauled`
 
-## Usage
+# Usage
 
 ```bash
 $ ./get-mauled
@@ -89,7 +92,7 @@ Commands:
 Run 'get-mauled COMMAND --help' for more information on a command.
 ```
 
-### Download Ze Malwarez :smiling_imp:
+## Download Ze Malwarez :smiling_imp:
 
 ```bash
 $ docker run --rm -it \
@@ -128,7 +131,7 @@ ls -lah /path/to/malware
 -rw-r--r--   1 blacktop  staff    25K Aug 13 22:49 e83c6c36dbd143ee0fd36aff30fb43529a34129817dc2530f251121527cbf4b4
 ```
 
-### Download malware to a [minio](https://minio.io/) server
+## Download malware to a [minio](https://minio.io/) server
 
 Start the `minio` server
 
@@ -154,7 +157,7 @@ $ docker run --rm -it --link minio \
 
 Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) to see the files _(creds:**admin/password**)_
 
-### Use with [MaliceIO](https://github.com/maliceio/malice)
+## Use with [MaliceIO](https://github.com/maliceio/malice)
 
 Tell MaliceIO to watch the current directory
 
@@ -180,32 +183,32 @@ You can also watch the data stream into [elasticsearch](https://github.com/malic
 $ malice elk
 ```
 
-## Issues
+# Issues
 
 Find a bug? Want more features? Find something missing in the documentation? Let me know! Please don't hesitate to [file an issue](https://github.com/malice-plugins/get-mauled/issues/new)
 
-## CHANGELOG
+# CHANGELOG
 
 See [`CHANGELOG.md`](https://github.com/malice-plugins/get-mauled/blob/master/CHANGELOG.md)
 
-## Contributing
+# Contributing
 
 [See all contributors on GitHub](https://github.com/malice-plugins/get-mauled/graphs/contributors).
 
 Please update the [CHANGELOG.md](https://github.com/malice-plugins/get-mauled/blob/master/CHANGELOG)
 
-## Credits
+# Credits
 
 - https://github.com/ytisf/theZoo
 - https://contagiodump.blogspot.com/
 - https://github.com/fabrimagic72/malware-samples
 
-## TODO
+# TODO
 
 - [x] parse all zips at the URLs above
 - [x] create golang binary releases for people who hate docker :whale:
 - [ ] fix contagio (flatten and increase zip level depth)
 
-## License
+# License
 
 MIT Copyright (c) 2018 **blacktop**
