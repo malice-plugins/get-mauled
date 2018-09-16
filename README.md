@@ -1,11 +1,6 @@
 <p align="center">
-    <a href="#"><img src="./docs/maul-logo.png" height="70" /></a>
+    <a href="#"><img src="./docs/maul-logo.png" height="140" /></a>
 </p><br/>
-
-<h1 align="center">
-    get-mauled
-</h1>
-<br/>
 
 <p align="center">
     <a href="#installation"><strong>Install</strong></a> ·
@@ -32,20 +27,17 @@
 
 > Download a Bunch of Malware for Demos and Testing
 
----
+## Installation
 
 ### Dependencies
 
-- [malice/alpine](https://hub.docker.com/r/malice/alpine/)
 - [7zip](https://www.7-zip.org/download.html)
 
-## Installation
+### Use Binary
 
-### Binary
+Download from [releases](https://github.com/malice-plugins/get-mauled/releases)
 
-Download binary: https://github.com/malice-plugins/get-mauled/releases
-
-### Docker
+### Use Docker
 
 [![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-31.8MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
 
