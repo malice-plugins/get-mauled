@@ -138,7 +138,7 @@ func PutDir(ctx context.Context, srcDir string) error {
 
 func downloadFromURL(url string, tmpfile *os.File) error {
 	// Download file
-	log.Info("Downloading file: ", url)
+	log.WithField("url", url).Info("downloading file")
 	response, err := http.Get(url)
 	if err != nil {
 		return errors.Wrapf(err, "downloading %s failed", url)
@@ -282,9 +282,9 @@ func SetUpDestination() error {
 			} else {
 				return errors.Wrapf(err, "unable to create bucket: %s", storageBucket)
 			}
+		} else {
+			log.Infof("successfully created bucket %s", storageBucket)
 		}
-		log.Infof("Successfully created bucket %s", storageBucket)
-
 	} else if len(outputDir) > 0 {
 		if _, err = os.Stat(outputDir); os.IsNotExist(err) {
 			return errors.Wrapf(err, "directory %s doesn't exist", outputDir)
