@@ -210,6 +210,7 @@ Please update the [CHANGELOG.md](https://github.com/malice-plugins/get-mauled/bl
 - [x] parse all zips at the URLs above
 - [x] create golang binary releases for people who hate docker :whale:
 - [ ] fix contagio (flatten and increase zip level depth)
+- [ ] http://www.megabeets.net/fantastic-malware-and-where-to-find-them/
 
 # License
 
