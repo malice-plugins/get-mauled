@@ -41,7 +41,7 @@ Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) 
 ### Upload malware into the `malice` Space
 
 ```bash
-$ docker run --rm -it --link minio \
+$ docker run --rm -it \
          malice/get-mauled \
          --store-url malice.nyc3.digitaloceanspaces.com \
          --store-id $DO_SPACE_KEY \
@@ -49,4 +49,8 @@ $ docker run --rm -it --link minio \
          --store-tls \
          download --password infected \
          https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
+
+INFO[0000] Successfully created bucket malice
+INFO[0000] Downloading file: https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
+INFO[0007] malware successfully sent to cloud storage    count=22 total_size="921 kB"
 ```
