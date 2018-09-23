@@ -10,6 +10,7 @@
 <p align="center">
     <a href="#installation"><strong>Install</strong></a> ·
     <a href="#usage"><strong>Usage</strong></a> ·
+    <a href="#documentation"><strong>Docs</strong></a> ·
     <a href="#contributing"><strong>Contribute</strong></a>
 </p>
 <br/>
@@ -36,11 +37,11 @@
 
 - [7zip](https://www.7-zip.org/download.html)
 
-## Use Binary
+## Via Binary
 
 Download from [releases](https://github.com/malice-plugins/get-mauled/releases)
 
-## Use Docker
+## Via Docker
 
 [![Docker Stars](https://img.shields.io/docker/stars/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Pulls](https://img.shields.io/docker/pulls/malice/get-mauled.svg)](https://hub.docker.com/r/malice/get-mauled/) [![Docker Image](https://img.shields.io/badge/docker%20image-31.8MB-blue.svg)](https://hub.docker.com/r/malice/get-mauled/)
 
@@ -49,11 +50,15 @@ Download from [releases](https://github.com/malice-plugins/get-mauled/releases)
 
 # Usage
 
+## Use binary
+
 ```bash
 $ ./get-mauled
 ```
 
 =OR=
+
+## Use docker
 
 ```bash
 $ docker run --rm -v /path/to/malware:/malware malice/get-mauled --help
@@ -131,59 +136,10 @@ ls -lah /path/to/malware
 -rw-r--r--   1 blacktop  staff    25K Aug 13 22:49 e83c6c36dbd143ee0fd36aff30fb43529a34129817dc2530f251121527cbf4b4
 ```
 
-## Download malware to a [minio](https://minio.io/) server
+# Documentation
 
-Start the `minio` server
-
-```bash
-$ docker run -d --name minio \
-             -p 9000:9000 \
-             -e MINIO_ACCESS_KEY=admin \
-             -e MINIO_SECRET_KEY=password \
-             minio/minio server /data
-```
-
-Download malware into the `malice` bucket of the `minio` instance
-
-```bash
-$ docker run --rm -it --link minio \
-         malice/get-mauled \
-         --store-url minio:9000 \
-         --store-id admin \
-         --store-key password \
-         download --password infected \
-         https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
-```
-
-Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) to see the files _(creds:**admin/password**)_
-
-![minio](https://raw.githubusercontent.com/malice-plugins/get-mauled/master/docs/minio.png)
-
-## Use with [MaliceIO](https://github.com/maliceio/malice)
-
-Tell MaliceIO to watch the current directory
-
-```bash
-$ malice watch .
-```
-
-Use `get-mauled` to download to the current directory
-
-```bash
-$ docker run --rm -it -v `pwd`:/malware malice/get-mauled the-zoo
-```
-
-Watch the fun begin :sunglasses: in another terminal
-
-```bash
-$ watch -n1 docker ps -a
-```
-
-You can also watch the data stream into [elasticsearch](https://github.com/maliceio/elasticsearch) by checking out the [kibana](https://github.com/maliceio/kibana) UI
-
-```bash
-$ malice elk
-```
+- [Upload to Cloud Storage](https://github.com/malice-plugins/get-mauled/blob/master/docs/cloud.md)
+- [Use with MaliceIO](https://github.com/malice-plugins/get-mauled/blob/master/docs/malice.md)
 
 # Issues
 
