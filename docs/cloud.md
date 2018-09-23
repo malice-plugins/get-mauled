@@ -54,3 +54,5 @@ INFO[0000] Successfully created bucket malice
 INFO[0000] Downloading file: https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 INFO[0007] malware successfully sent to cloud storage    count=22 total_size="921 kB"
 ```
+
+![files](https://raw.githubusercontent.com/malice-plugins/get-mauled/master/docs/do-files.png)
