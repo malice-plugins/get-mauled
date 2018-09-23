@@ -32,20 +32,21 @@ Open [http://localhost:9000/minio/malice/](http://localhost:9000/minio/malice/) 
 
 ### Create a Space
 
-![]()
+![create](https://raw.githubusercontent.com/malice-plugins/get-mauled/master/docs/do-create.png)
 
 ### Get Creds
 
-![]()
+![creds](https://raw.githubusercontent.com/malice-plugins/get-mauled/master/docs/do-creds.png)
 
 ### Upload malware into the `malice` Space
 
 ```bash
 $ docker run --rm -it --link minio \
          malice/get-mauled \
-         --store-url minio:9000 \
-         --store-id admin \
-         --store-key password \
+         --store-url malice.nyc3.digitaloceanspaces.com \
+         --store-id $DO_SPACE_KEY \
+         --store-key $DO_SPACE_SECRET \
+         --store-tls \
          download --password infected \
          https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 ```
