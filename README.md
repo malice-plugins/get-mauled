@@ -79,7 +79,8 @@ Options:
   --output value, -o value  set output directory [$MALICE_OUTPUT_DIRECTORY]
   --store-url value         s3 or minio file server url [$MALICE_STORAGE_URL]
   --store-tls               enable secure (HTTPS) access [$MALICE_STORAGE_TLS]
-  --store-zone value        s3 or minio availbility zone location (default: "us-east-1") [$MALICE_STORAGE_ZONE]
+  --store-zone value        s3 or minio availbility zone location (default: "us-east-1")
+                            [$MALICE_STORAGE_ZONE]
   --store-bucket value      name of the minio or s3 bucket (default: "malice") [$MALICE_STORAGE_BUCKET]
   --store-id value          user ID that uniquely identifies your account [$MALICE_STORAGE_ID]
   --store-key value         secret key is the password to your account [$MALICE_STORAGE_KEY]
@@ -101,14 +102,15 @@ Run 'get-mauled COMMAND --help' for more information on a command.
 
 ```bash
 $ docker run --rm -it \
-             -v /path/to/malware:/malware \
-             malice/get-mauled download --password infected https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
+             -v /path/to/download/malware:/malware \
+             malice/get-mauled download --password infected \
+             https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 
 INFO[0000] Downloading file: https://github.com/ytisf/theZoo/raw/master/malwares/Binaries/Duqu2/Duqu2.zip
 ```
 
 ```bash
-ls -lah /path/to/malware
+ls -lah /path/to/downloaded/malware
 ```
 
 ```bash

@@ -1,6 +1,6 @@
 # Use With Cloud Storage
 
-## Download malware to a [minio](https://minio.io/) server
+## Upload malware to a [minio](https://minio.io/) server
 
 Start the `minio` server
 
