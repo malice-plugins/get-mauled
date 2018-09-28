@@ -88,7 +88,7 @@ func FlattenDir(src string, dst string) error {
 
 		if fd.IsDir() {
 			if err = FlattenDir(srcfp, dst); err != nil {
-				fmt.Println(err)
+				log.Error(err)
 			}
 		} else {
 			// err := os.Rename(srcfp, dstfp)
@@ -464,7 +464,7 @@ func main() {
 				defer os.RemoveAll(tmpDir)
 
 				for _, zipFile := range zipFiles {
-					fmt.Println(zipFile)
+					log.WithField("zip", zipFile).Debug("found zip")
 					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
 					if err != nil {
 						return errors.Wrapf(err, "unzipping %s failed", zipFile)
@@ -543,7 +543,7 @@ func main() {
 				defer os.RemoveAll(tmpDir)
 
 				for _, zipFile := range zipFiles {
-					fmt.Println(zipFile)
+					log.WithField("zip", zipFile).Debug("found zip")
 					out, _ := unzip(ctx, zipFile, getPassword(zipFile), tmpDir)
 					if err != nil {
 						return errors.Wrapf(err, "unzipping %s failed", zipFile)
@@ -621,7 +621,7 @@ func main() {
 				defer os.RemoveAll(tmpDir)
 
 				for _, zipFile := range zipFiles {
-					fmt.Println(zipFile)
+					log.WithField("zip", zipFile).Debug("found zip")
 					out, _ := unzip(ctx, zipFile, "infected", tmpDir)
 					if err != nil {
 						return errors.Wrapf(err, "unzipping %s failed", zipFile)
